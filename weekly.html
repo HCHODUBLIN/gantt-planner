@@ -595,7 +595,7 @@
         </div>
         <div class="info-block">
           <div class="info-label">🏃 목표</div>
-          <div class="info-value">이번주 2-3회 운동</div>
+          <div class="info-value" id="exerciseGoal">이번주 2-3회 운동</div>
         </div>
       </div>
 
@@ -693,6 +693,7 @@
     let editingSlot = null;
     let draggedTask = null;
     let dragSourceSlot = null;
+    let routineConfig = null;
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
@@ -705,13 +706,33 @@
       fetch('tasks.json')
         .then(r => r.json())
         .then(data => {
+          // Check localStorage override (same as Gantt chart)
+          let finalData = data;
+          const saved = localStorage.getItem('gantt-data');
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              if (parsed.categories && parsed.categories.length > 0) finalData = parsed;
+            } catch (e) {}
+          }
+
           allTasks = [];
-          data.categories.forEach(cat => {
+          finalData.categories.forEach(cat => {
             allTasks = allTasks.concat(cat.tasks.filter(t => t.id));
           });
+          routineConfig = finalData.routine || {};
+          applyRoutineToHeader();
           renderWeek();
         })
         .catch(err => console.error('Error loading tasks:', err));
+    }
+
+    function applyRoutineToHeader() {
+      if (!routineConfig) return;
+      const exerciseEl = document.getElementById('exerciseGoal');
+      if (exerciseEl && routineConfig.exercise) {
+        exerciseEl.textContent = routineConfig.exercise;
+      }
     }
 
     function setCurrentWeek() {
@@ -761,11 +782,19 @@
 
         dayCol.appendChild(header);
 
-        // For Saturday - full rest
+        // Get routine config
+        const routine = routineConfig || {};
+        const blocks = routine.blocks || [
+          { key: 'morning', emoji: '🌅', label: '아침', hours: '09-12', desc: '' },
+          { key: 'afternoon', emoji: '☀️', label: '오후', hours: '13-17', desc: '' },
+          { key: 'evening', emoji: '🌙', label: '저녁', hours: '18-19', desc: '' }
+        ];
+
+        // Saturday - rest
         if (i === 5) {
           const restBlock = document.createElement('div');
           restBlock.className = 'rest-day time-block';
-          restBlock.innerHTML = '<div style="font-size: 24px;">😴</div><div>완전 휴식</div>';
+          restBlock.innerHTML = `<div style="font-size: 24px;">😴</div><div>${routine.saturday || '완전 휴식'}</div>`;
           dayCol.appendChild(restBlock);
         } else if (i === 6) {
           // Sunday - study and planning
@@ -774,7 +803,7 @@
           studyBlock.style.background = 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)';
           const studyLabel = document.createElement('div');
           studyLabel.className = 'time-label';
-          studyLabel.textContent = '📚 깊은 학습 & 다음주 계획';
+          studyLabel.textContent = `📚 ${routine.sunday || '깊은 학습 & 다음주 계획'}`;
           const container = document.createElement('div');
           container.className = 'tasks-container';
           const dayKey = formatDateKey(date);
@@ -784,31 +813,25 @@
           studyBlock.appendChild(container);
           dayCol.appendChild(studyBlock);
         } else {
-          // Weekdays - morning, afternoon, evening
-          const times = [
-            { period: 'morning', label: '🌅 아침 (09-12)', hours: '9-12' },
-            { period: 'afternoon', label: '☀️ 오후 (13-17)', hours: '13-17' },
-            { period: 'evening', label: '🌙 저녁 (18-19)', hours: '18-19' }
-          ];
-
-          times.forEach(time => {
+          // Weekdays - dynamic time blocks from routine config
+          blocks.forEach(b => {
             const block = document.createElement('div');
-            block.className = `time-block ${time.period}`;
+            block.className = `time-block ${b.key}`;
             block.onclick = (e) => {
               if (e.target === block || e.target.classList.contains('time-label')) {
-                openAddModal(formatDateKey(date), time.period);
+                openAddModal(formatDateKey(date), b.key);
               }
             };
 
             const label = document.createElement('div');
             label.className = 'time-label';
-            label.textContent = time.label;
+            label.textContent = `${b.emoji} ${b.label} (${b.hours})`;
 
             const container = document.createElement('div');
             container.className = 'tasks-container';
             const dayKey = formatDateKey(date);
-            const tasksInSlot = getTasksForSlot(dayKey, time.period);
-            renderTasksInSlot(container, tasksInSlot, dayKey, time.period);
+            const tasksInSlot = getTasksForSlot(dayKey, b.key);
+            renderTasksInSlot(container, tasksInSlot, dayKey, b.key);
 
             block.appendChild(label);
             block.appendChild(container);
@@ -1087,7 +1110,7 @@
       markdown += `## 🎯 이번주 핵심\n`;
       markdown += `- **핵심 프로젝트**: ${document.getElementById('focusProject').textContent}\n`;
       markdown += `- **현재 학습**: ${document.getElementById('currentTraining').textContent}\n`;
-      markdown += `- **목표**: 이번주 2-3회 운동\n\n`;
+      markdown += `- **목표**: ${routineConfig?.exercise || '이번주 2-3회 운동'}\n\n`;
 
       const dayNames = ['월', '화', '수', '목', '금', '토', '일'];
       for (let i = 0; i < 7; i++) {
@@ -1111,11 +1134,12 @@
           }
           markdown += '\n';
         } else {
-          const periods = [
-            { key: 'morning', label: '🌅 아침 (09-12)' },
-            { key: 'afternoon', label: '☀️ 오후 (13-17)' },
-            { key: 'evening', label: '🌙 저녁 (18-19)' }
+          const rBlocks = routineConfig?.blocks || [
+            { key: 'morning', emoji: '🌅', label: '아침', hours: '09-12' },
+            { key: 'afternoon', emoji: '☀️', label: '오후', hours: '13-17' },
+            { key: 'evening', emoji: '🌙', label: '저녁', hours: '18-19' }
           ];
+          const periods = rBlocks.map(b => ({ key: b.key, label: `${b.emoji} ${b.label} (${b.hours})` }));
           periods.forEach(period => {
             const tasks = getTasksForSlot(dayKey, period.key);
             if (tasks.length > 0) {

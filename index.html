@@ -16,8 +16,11 @@
   .filter-btn { padding: 5px 12px; border-radius: 6px; border: 1.5px solid #ddd; background: #fff; font-size: 11.5px; cursor: pointer; transition: all 0.15s; color: #555; }
   .filter-btn:hover { border-color: #999; }
   .filter-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+  .filter-btn.p-filter.active { box-shadow: 0 0 0 2px #1a1a2e; font-weight: 700; }
   .action-btn { padding: 5px 12px; border-radius: 6px; border: 1.5px solid #ddd; background: #fff; font-size: 11.5px; cursor: pointer; transition: all 0.15s; color: #555; text-decoration: none; display: inline-flex; align-items: center; }
   .action-btn:hover { border-color: #999; }
+  .action-btn.save { background: #10b981; color: #fff; border-color: #10b981; }
+  .action-btn.save:hover { background: #059669; }
   .action-btn.export { background: #6366f1; color: #fff; border-color: #6366f1; }
   .action-btn.reset { background: #fca5a5; border-color: #ef4444; color: #333; }
   .action-btn.weekly { background: #6366f1; color: #fff; border-color: #6366f1; }
@@ -36,8 +39,18 @@
   tbody td:nth-child(2) { position: sticky; left: 300px; background: #fff; z-index: 2; text-align: center; }
   tr:hover td:first-child, tr:hover td:nth-child(2) { background: #fafbfc; }
   .bar-cell { padding: 6px 1px !important; }
-  .bar { height: 22px; border-radius: 4px; position: relative; cursor: pointer; transition: filter 0.15s; display: flex; align-items: center; justify-content: center; }
+  .bar { height: 22px; border-radius: 4px; position: relative; cursor: grab; display: flex; align-items: center; justify-content: center; }
   .bar:hover { filter: brightness(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .bar-handle { position: absolute; top: 0; width: 7px; height: 100%; cursor: ew-resize; z-index: 4; }
+  .bar-handle:hover, .bar-handle.active { background: rgba(255,255,255,0.4); }
+  .bar-handle.left { left: 0; border-radius: 4px 0 0 4px; }
+  .bar-handle.right { right: 0; border-radius: 0 4px 4px 0; }
+  .bar.dragging { opacity: 0.7; cursor: grabbing; }
+  .col-highlight { background: rgba(99,102,241,0.1) !important; }
+  .task-row-dragging { opacity: 0.4; }
+  .category-row.drop-target td { background: #dbeafe !important; border-bottom: 3px solid #6366f1 !important; }
+  tr.drop-above td { border-top: 3px solid #6366f1 !important; }
+  tr.drop-below td { border-bottom: 3px solid #6366f1 !important; }
   .priority-tag { display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
   .p-urgent { background: #fee2e2; color: #dc2626; }
   .p-high { background: #ffedd5; color: #ea580c; }
@@ -47,25 +60,7 @@
   .s-done { background: #e0e7ff; color: #4338ca; }
   .s-progress { background: #dbeafe; color: #2563eb; }
   .s-pending { background: #f3f4f6; color: #6b7280; }
-  .c-map { background: linear-gradient(135deg, #6366f1, #818cf8); }
-  .c-paper { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
-  .c-comm { background: linear-gradient(135deg, #10b981, #34d399); }
-  .c-food { background: linear-gradient(135deg, #ec4899, #f472b6); }
-  .c-action { background: linear-gradient(135deg, #ef4444, #f87171); }
-  .c-misc { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
-  .c-cde { background: linear-gradient(135deg, #0ea5e9, #38bdf8); }
-  .c-video { background: linear-gradient(135deg, #14b8a6, #2dd4bf); }
-  .c-event { background: linear-gradient(135deg, #f97316, #fb923c); }
-  .c-diss { background: linear-gradient(135deg, #a855f7, #c084fc); }
-  .c-zoomcamp { background: linear-gradient(135deg, #dc2626, #ef4444); }
-  .c-cert { background: linear-gradient(135deg, #059669, #10b981); }
-  .c-course { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
-  .c-career { background: linear-gradient(135deg, #0284c7, #0ea5e9); }
-  .c-proj { background: linear-gradient(135deg, #0d9488, #14b8a6); }
-  .c-interview { background: linear-gradient(135deg, #be185d, #ec4899); }
-  .c-life { background: linear-gradient(135deg, #65a30d, #84cc16); }
-  .c-leetcode { background: linear-gradient(135deg, #d97706, #f59e0b); }
-  .c-admin { background: linear-gradient(135deg, #64748b, #94a3b8); }
+  /* Category bar colors are set dynamically via JS */
   .tooltip { display: none; position: absolute; background: #1a1a2e; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 11px; z-index: 100; white-space: nowrap; bottom: 110%; left: 50%; transform: translateX(-50%); pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
   .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1a1a2e; }
   .bar:hover .tooltip { display: block; }
@@ -76,6 +71,17 @@
   .section-divider td { height: 8px; background: #e8eaed; padding: 0; border: none; }
   .completed-row td:first-child { color: #aaa; text-decoration: line-through; }
   .completed-row .bar { opacity: 0.4; }
+
+  /* Category controls */
+  .cat-controls { float: right; display: none; gap: 4px; }
+  .category-row:hover .cat-controls { display: inline-flex; }
+  .cat-btn { background: none; border: none; cursor: pointer; font-size: 11px; padding: 2px 5px; border-radius: 3px; color: #666; }
+  .cat-btn:hover { background: rgba(0,0,0,0.08); }
+
+  /* Language toggle */
+  .lang-toggle { position: fixed; top: 16px; right: 24px; z-index: 500; display: flex; align-items: center; background: #fff; border: 1.5px solid #ddd; border-radius: 20px; padding: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; }
+  .lang-toggle span { padding: 4px 10px; font-size: 11.5px; font-weight: 600; border-radius: 16px; transition: all 0.2s; color: #888; }
+  .lang-toggle span.active { background: #1a1a2e; color: #fff; }
 
   /* Routine section */
   .routine-section { margin-top: 20px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 16px 20px; font-size: 12px; }
@@ -103,44 +109,28 @@
 </head>
 <body>
 
-<h1>업무 간트 차트 2026</h1>
-<p class="subtitle">2026년 3월 ~ 9월 | <span id="updatedDate"></span> | Week columns start from Mar 23</p>
-
-<div class="legend">
-  <div class="legend-item"><div class="legend-color c-action"></div>Action Items</div>
-  <div class="legend-item"><div class="legend-color c-map"></div>Food Sharing Map</div>
-  <div class="legend-item"><div class="legend-color c-paper"></div>Papers</div>
-  <div class="legend-item"><div class="legend-color c-comm"></div>Communication</div>
-  <div class="legend-item"><div class="legend-color c-food"></div>Foodcloud</div>
-  <div class="legend-item"><div class="legend-color c-cde"></div>CDE Spoke Cities</div>
-  <div class="legend-item"><div class="legend-color c-video"></div>CDE Video</div>
-  <div class="legend-item"><div class="legend-color c-event"></div>CDE Events</div>
-  <div class="legend-item"><div class="legend-color c-diss"></div>CDE Dissemination</div>
-  <div class="legend-item"><div class="legend-color c-proj"></div>Projects</div>
-  <div class="legend-item"><div class="legend-color c-misc"></div>Misc</div>
-  <div class="legend-item"><div class="legend-color c-zoomcamp"></div>DE Zoomcamp</div>
-  <div class="legend-item"><div class="legend-color c-cert"></div>Certifications</div>
-  <div class="legend-item"><div class="legend-color c-course"></div>Courses</div>
-  <div class="legend-item"><div class="legend-color c-career"></div>Career Dev</div>
-  <div class="legend-item"><div class="legend-color c-interview"></div>Interview</div>
-  <div class="legend-item"><div class="legend-color c-admin"></div>Admin/Visa</div>
-  <div class="legend-item" style="margin-left:6px;">
-    <span class="priority-tag p-urgent">URGENT</span>
-    <span class="priority-tag p-high">HIGH</span>
-    <span class="priority-tag p-medium">MED</span>
-    <span class="priority-tag p-low">LOW</span>
-  </div>
+<div class="lang-toggle" id="langToggle">
+  <span id="langEN">EN</span>
+  <span id="langKO" class="active">KO</span>
 </div>
+
+<h1 id="pageTitle">업무 간트 차트 2026</h1>
+<p class="subtitle">2026년 3월 ~ 9월 | <span id="updatedDate"></span> | Week columns start from Mar 23</p>
 
 <div class="filter-bar">
   <button class="filter-btn active" data-filter="all">전체</button>
-  <button class="filter-btn" data-filter="active">진행중</button>
-  <button class="filter-btn" data-filter="wp2">WP2</button>
-  <button class="filter-btn" data-filter="cde">CDE</button>
-  <button class="filter-btn" data-filter="projects">기술 프로젝트</button>
-  <button class="filter-btn" data-filter="personal">개인 개발</button>
-  <button class="filter-btn" data-filter="interview">인터뷰</button>
+  <button class="filter-btn" data-filter="active" style="background:#dbeafe; color:#2563eb; border-color:#bfdbfe;">진행중</button>
+  <button class="filter-btn" data-filter="pending" style="background:#f3f4f6; color:#6b7280; border-color:#e5e7eb;">미진행</button>
+  <button class="filter-btn" data-filter="done" style="background:#e0e7ff; color:#4338ca; border-color:#c7d2fe;">완료</button>
+  <span id="tagFilters"></span><button class="action-btn" id="manageTagsBtn" onclick="openTagManageModal()" style="padding:3px 7px; font-size:11px; margin-left:2px;" title="태그 관리">⚙️</button>
+  <span style="color:#ccc; margin:0 4px;">|</span>
+  <button class="filter-btn p-filter" data-filter="p-urgent" style="background:#fee2e2; color:#dc2626; border-color:#fca5a5;">URGENT</button>
+  <button class="filter-btn p-filter" data-filter="p-high" style="background:#ffedd5; color:#ea580c; border-color:#fed7aa;">HIGH</button>
+  <button class="filter-btn p-filter" data-filter="p-medium" style="background:#fef9c3; color:#a16207; border-color:#fde68a;">MED</button>
+  <button class="filter-btn p-filter" data-filter="p-low" style="background:#dcfce7; color:#16a34a; border-color:#bbf7d0;">LOW</button>
   <a href="weekly.html" class="action-btn weekly" style="margin-left: auto;">📅 주간 플래너</a>
+  <button class="action-btn" id="addCatBtn" style="background:#8b5cf6; color:#fff; border-color:#8b5cf6;">+ 카테고리</button>
+  <button class="action-btn save" id="saveBtn">💾 저장</button>
   <button class="action-btn export" id="exportBtn">JSON 다운로드</button>
   <button class="action-btn reset" id="resetBtn">초기화</button>
 </div>
@@ -163,14 +153,64 @@
 </div>
 
 <div class="routine-section" id="routineSection">
-  <h3>Daily Routine</h3>
-  <div class="routine-item"><span class="routine-label">아침:</span> <span class="routine-text" id="routineMorning"></span></div>
-  <div class="routine-item"><span class="routine-label">오후:</span> <span class="routine-text" id="routineAfternoon"></span></div>
-  <div class="routine-item"><span class="routine-label">저녁:</span> <span class="routine-text" id="routineEvening"></span></div>
-  <div class="routine-item"><span class="routine-label">규칙:</span> <span class="routine-text" id="routineRules"></span></div>
-  <div class="routine-item"><span class="routine-label">일요일:</span> <span class="routine-text" id="routineSunday"></span></div>
-  <div class="routine-item"><span class="routine-label">토요일:</span> <span class="routine-text" id="routineSaturday"></span></div>
-  <div class="routine-item"><span class="routine-label">운동:</span> <span class="routine-text" id="routineExercise"></span></div>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+    <h3 id="routineTitle">Daily Routine</h3>
+    <button class="action-btn" id="editRoutineBtn" style="font-size:11px; padding:4px 10px;">✏️ 편집</button>
+  </div>
+  <div id="routineContent"></div>
+</div>
+
+<!-- Tag Management Modal -->
+<div class="modal-overlay" id="tagManageModal">
+  <div class="modal-content" style="max-width:450px;">
+    <div class="modal-title" id="tagManageModalTitle">태그 관리</div>
+    <div id="tagManageList" style="max-height:400px; overflow-y:auto;"></div>
+    <div class="modal-buttons">
+      <button onclick="closeTagManageModal()" id="tagManageCloseBtn">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Edit Modal -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal-content">
+    <div class="modal-title" id="catModalTitle">카테고리 편집</div>
+    <div class="form-group"><label id="clName">카테고리 이름</label><input type="text" id="catName" placeholder="📊 Food Sharing Map (T6.2.1)"></div>
+    <div class="form-group">
+      <label id="clTags">태그</label>
+      <div id="catTagCheckboxes" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;"></div>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <input type="text" id="newTagInput" placeholder="새 태그 추가..." style="flex:1; padding:6px 8px; border:1.5px solid #ddd; border-radius:6px; font-size:11px;">
+        <button type="button" onclick="addCustomTag()" style="padding:6px 10px; background:#6366f1; color:#fff; border:none; border-radius:6px; font-size:11px; cursor:pointer;">+</button>
+      </div>
+      <div style="font-size:10px; color:#888; margin-top:4px;" id="clTagHint">여러 태그를 선택하면 여러 필터에서 표시됩니다</div>
+    </div>
+    <div class="modal-buttons">
+      <button class="delete-btn" id="deleteCatBtn">삭제</button>
+      <button onclick="closeCatModal()">취소</button>
+      <button class="save-btn" onclick="saveCategory()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- Routine Edit Modal -->
+<div class="modal-overlay" id="routineModal">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-title" id="routineModalTitle">루틴 편집</div>
+    <div id="routineBlocksEditor"></div>
+    <hr style="margin:12px 0; border:none; border-top:1px solid #eee;">
+    <div class="form-group"><label id="rlSaturday">토요일</label><input type="text" id="rSaturday"></div>
+    <div class="form-group"><label id="rlSunday">일요일</label><input type="text" id="rSunday"></div>
+    <div class="form-group"><label id="rlRules">규칙</label><input type="text" id="rRules"></div>
+    <div class="form-group"><label id="rlExercise">운동</label><input type="text" id="rExercise"></div>
+    <div style="margin-top:12px; border-top:1px solid #eee; padding-top:12px;">
+      <button class="action-btn" id="addBlockBtn" style="font-size:11px;">+ 시간 블록 추가</button>
+    </div>
+    <div class="modal-buttons">
+      <button onclick="closeRoutineModal()">취소</button>
+      <button class="save-btn" onclick="saveRoutine()">저장</button>
+    </div>
+  </div>
 </div>
 
 <!-- Edit Modal -->
@@ -201,6 +241,122 @@ let allData = {};
 let currentFilter = 'all';
 let editingTaskId = null;
 let editingCategoryIdx = null;
+let currentLang = localStorage.getItem('gantt-lang') || 'ko';
+
+// i18n translations
+const i18n = {
+  ko: {
+    title: '업무 간트 차트 2026',
+    subtitle: '2026년 3월 ~ 9월',
+    filterAll: '전체', filterActive: '진행중', filterPending: '미진행', filterDone: '완료', filterProjects: '기술 프로젝트',
+    filterPersonal: '개인 개발', filterInterview: '인터뷰',
+    weeklyBtn: '📅 주간 플래너', addCatBtn: '+ 카테고리', saveBtn: '💾 저장', exportBtn: 'JSON 다운로드', resetBtn: '초기화',
+    thTask: 'Task', thStatus: 'Status',
+    statusDone: '완료', statusProgress: '진행', statusPending: '미진행',
+    routineTitle: 'Daily Routine',
+    routineMorning: '아침:', routineAfternoon: '오후:', routineEvening: '저녁:',
+    routineRules: '규칙:', routineSunday: '일요일:', routineSaturday: '토요일:', routineExercise: '운동:',
+    modalTitle: '작업 수정', labelName: '작업명', labelStatus: '상태', labelPriority: '우선순위',
+    labelStart: '시작 날짜', labelEnd: '종료 날짜',
+    optPending: '미진행', optProgress: '진행중', optDone: '완료',
+    optLow: '낮음', optMedium: '중간', optHigh: '높음', optUrgent: '긴급',
+    deleteBtn: '삭제', cancelBtn: '취소', saveBtn: '저장',
+    confirmReset: '정말 초기화하시겠습니까? 모든 변경 사항이 삭제됩니다.',
+    tagManageTitle: '태그 관리', tagManageClose: '닫기', tagManageRename: '이름 변경',
+    tagDeleteConfirm: '태그 "{tag}"를 모든 카테고리에서 삭제하시겠습니까?',
+    tagRenamePrompt: '새 태그 이름을 입력하세요:'
+  },
+  en: {
+    title: 'Work Gantt Chart 2026',
+    subtitle: 'Mar – Sep 2026',
+    filterAll: 'All', filterActive: 'In Progress', filterPending: 'Pending', filterDone: 'Done', filterProjects: 'Tech Projects',
+    filterPersonal: 'Personal Dev', filterInterview: 'Interview',
+    weeklyBtn: '📅 Weekly Planner', addCatBtn: '+ Category', saveBtn: '💾 Save', exportBtn: 'Export JSON', resetBtn: 'Reset',
+    thTask: 'Task', thStatus: 'Status',
+    statusDone: 'Done', statusProgress: 'Active', statusPending: 'Pending',
+    routineTitle: 'Daily Routine',
+    routineMorning: 'Morning:', routineAfternoon: 'Afternoon:', routineEvening: 'Evening:',
+    routineRules: 'Rules:', routineSunday: 'Sunday:', routineSaturday: 'Saturday:', routineExercise: 'Exercise:',
+    modalTitle: 'Edit Task', labelName: 'Task Name', labelStatus: 'Status', labelPriority: 'Priority',
+    labelStart: 'Start Date', labelEnd: 'End Date',
+    optPending: 'Pending', optProgress: 'In Progress', optDone: 'Done',
+    optLow: 'Low', optMedium: 'Medium', optHigh: 'High', optUrgent: 'Urgent',
+    deleteBtn: 'Delete', cancelBtn: 'Cancel', saveBtn: 'Save',
+    confirmReset: 'Are you sure you want to reset? All changes will be deleted.',
+    tagManageTitle: 'Manage Tags', tagManageClose: 'Close', tagManageRename: 'Rename',
+    tagDeleteConfirm: 'Delete tag "{tag}" from all categories?',
+    tagRenamePrompt: 'Enter new tag name:'
+  }
+};
+
+function t(key) { return i18n[currentLang][key] || key; }
+
+function applyLang() {
+  document.documentElement.lang = currentLang;
+  document.getElementById('pageTitle').textContent = t('title');
+  document.querySelector('.subtitle').innerHTML = t('subtitle') + ' | <span id="updatedDate">Updated: ' + (allData.updated || '') + '</span> | Week columns start from Mar 23';
+
+  // Filter buttons
+  const filterKeys = { all: 'filterAll', active: 'filterActive', pending: 'filterPending', done: 'filterDone' };
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    const key = filterKeys[btn.dataset.filter];
+    if (key) btn.textContent = t(key);
+  });
+
+  // Action buttons
+  document.querySelector('.action-btn.weekly').textContent = t('weeklyBtn');
+  document.getElementById('addCatBtn').textContent = t('addCatBtn');
+  document.getElementById('saveBtn').textContent = t('saveBtn');
+  document.getElementById('exportBtn').textContent = t('exportBtn');
+  document.getElementById('resetBtn').textContent = t('resetBtn');
+
+  // Table headers
+  const monthHeader = document.getElementById('month-header');
+  monthHeader.children[0].textContent = t('thTask');
+  monthHeader.children[1].textContent = t('thStatus');
+
+  // Category modal labels
+  document.getElementById('clName').textContent = currentLang === 'ko' ? '카테고리 이름' : 'Category Name';
+  document.getElementById('clTags').textContent = currentLang === 'ko' ? '태그' : 'Tags';
+  document.getElementById('clTagHint').textContent = currentLang === 'ko' ? '여러 태그를 선택하면 여러 필터에서 표시됩니다' : 'Select multiple tags to show in multiple filters';
+  document.getElementById('newTagInput').placeholder = currentLang === 'ko' ? '새 태그 추가...' : 'Add new tag...';
+  document.getElementById('deleteCatBtn').textContent = t('deleteBtn');
+
+  // Routine
+  document.getElementById('routineTitle').textContent = t('routineTitle');
+  document.getElementById('editRoutineBtn').textContent = currentLang === 'ko' ? '✏️ 편집' : '✏️ Edit';
+  renderRoutine();
+
+  // Modal
+  document.querySelector('.modal-title').textContent = t('modalTitle');
+  const formLabels = document.querySelectorAll('.form-group label');
+  const formKeys = ['labelName','labelStatus','labelPriority','labelStart','labelEnd'];
+  formLabels.forEach((el, i) => { if (formKeys[i]) el.textContent = t(formKeys[i]); });
+
+  // Modal select options
+  const statusSelect = document.getElementById('editStatus');
+  statusSelect.options[0].textContent = t('optPending');
+  statusSelect.options[1].textContent = t('optProgress');
+  statusSelect.options[2].textContent = t('optDone');
+
+  const prioritySelect = document.getElementById('editPriority');
+  prioritySelect.options[0].textContent = t('optLow');
+  prioritySelect.options[1].textContent = t('optMedium');
+  prioritySelect.options[2].textContent = t('optHigh');
+  prioritySelect.options[3].textContent = t('optUrgent');
+
+  // Modal buttons
+  document.getElementById('deleteBtn').textContent = t('deleteBtn');
+  document.querySelector('.modal-buttons button:nth-child(2)').textContent = t('cancelBtn');
+  document.querySelector('.modal-buttons .save-btn').textContent = t('saveBtn');
+
+  // Toggle highlight
+  document.getElementById('langEN').classList.toggle('active', currentLang === 'en');
+  document.getElementById('langKO').classList.toggle('active', currentLang === 'ko');
+
+  // Re-render to update status labels in the chart
+  render(currentFilter);
+}
 
 // Date to column index
 function dateToCol(dateStr) {
@@ -251,15 +407,79 @@ async function loadData() {
     try {
       const parsed = JSON.parse(saved);
       if (parsed.categories && parsed.categories.length > 0) {
+        // Migrate old "section" to "tags"
+        parsed.categories.forEach(cat => {
+          if (cat.section && !cat.tags) {
+            cat.tags = [cat.section];
+            delete cat.section;
+          }
+        });
         allData = parsed;
       }
     } catch (e) { /* ignore bad localStorage */ }
   }
 
-  document.getElementById('updatedDate').textContent = 'Updated: ' + allData.updated;
   buildHeaders();
+  buildTagFilters();
   renderRoutine();
-  render(currentFilter);
+  applyLang();
+}
+
+// Build tag filter buttons from data
+function buildTagFilters() {
+  const container = document.getElementById('tagFilters');
+  container.innerHTML = '';
+  const allTags = new Set();
+  (allData.categories || []).forEach(cat => {
+    (cat.tags || []).forEach(tag => {
+      if (!tag.startsWith('divider')) allTags.add(tag);
+    });
+  });
+
+  allTags.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.filter = tag;
+    btn.textContent = tag.toUpperCase();
+    if (currentFilter === tag) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      if (currentFilter === tag) {
+        // Toggle off — go back to all
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+        currentFilter = 'all';
+      } else {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = tag;
+      }
+      render(currentFilter);
+    });
+    container.appendChild(btn);
+  });
+}
+
+// Category color palette (cool tones — won't conflict with urgency red/orange/yellow/green)
+const catColors = [
+  'linear-gradient(135deg, #3b82f6, #60a5fa)',  // blue
+  'linear-gradient(135deg, #8b5cf6, #a78bfa)',  // violet
+  'linear-gradient(135deg, #06b6d4, #22d3ee)',  // cyan
+  'linear-gradient(135deg, #ec4899, #f472b6)',  // pink
+  'linear-gradient(135deg, #6366f1, #818cf8)',  // indigo
+  'linear-gradient(135deg, #0ea5e9, #38bdf8)',  // sky
+  'linear-gradient(135deg, #14b8a6, #2dd4bf)',  // teal
+  'linear-gradient(135deg, #a855f7, #c084fc)',  // purple
+  'linear-gradient(135deg, #64748b, #94a3b8)',  // slate
+  'linear-gradient(135deg, #0284c7, #0ea5e9)',  // blue-dark
+  'linear-gradient(135deg, #7c3aed, #8b5cf6)',  // violet-dark
+  'linear-gradient(135deg, #0d9488, #14b8a6)',  // teal-dark
+  'linear-gradient(135deg, #be185d, #ec4899)',  // rose
+  'linear-gradient(135deg, #4f46e5, #6366f1)',  // indigo-dark
+  'linear-gradient(135deg, #475569, #64748b)',  // slate-dark
+];
+
+function getCategoryColor(catIdx) {
+  return catColors[catIdx % catColors.length];
 }
 
 // Render gantt chart
@@ -271,7 +491,8 @@ function render(filter) {
 
   categories.forEach((cat, catIdx) => {
     // Dividers
-    if (cat.section && cat.section.startsWith('divider')) {
+    const tags = cat.tags || [];
+    if (tags.some(t => t.startsWith('divider'))) {
       if (filter !== 'all' && filter !== 'active') return;
       const divRow = document.createElement('tr');
       divRow.className = 'section-divider';
@@ -282,46 +503,136 @@ function render(filter) {
       return;
     }
 
-    // Section filter
-    if (filter === 'wp2' && cat.section !== 'wp2') return;
-    if (filter === 'cde' && cat.section !== 'cde') return;
-    if (filter === 'projects' && cat.section !== 'projects') return;
-    if (filter === 'personal' && cat.section !== 'personal') return;
-    if (filter === 'interview' && cat.section !== 'interview') return;
+    // Tag filter (dynamic — any non-priority, non-status filter is a tag)
+    const specialFilters = ['all', 'active', 'pending', 'done', 'p-urgent', 'p-high', 'p-medium', 'p-low'];
+    if (!specialFilters.includes(filter) && !tags.includes(filter)) return;
 
     let tasks = cat.tasks || [];
     if (filter === 'active') {
       tasks = tasks.filter(t => t.status === 'progress');
       if (tasks.length === 0) return;
     }
+    if (filter === 'pending') {
+      tasks = tasks.filter(t => t.status === 'pending');
+      if (tasks.length === 0) return;
+    }
+    if (filter === 'done') {
+      tasks = tasks.filter(t => t.status === 'done');
+      if (tasks.length === 0) return;
+    }
+    // Priority filter
+    const priorityFilters = { 'p-urgent': 'urgent', 'p-high': 'high', 'p-medium': 'medium', 'p-low': 'low' };
+    if (priorityFilters[filter]) {
+      tasks = tasks.filter(t => t.priority === priorityFilters[filter]);
+      if (tasks.length === 0) return;
+    }
 
-    // Category header row
+    // Category header row (drop target)
     const catRow = document.createElement('tr');
     catRow.className = 'category-row';
+    catRow.dataset.catIdx = catIdx;
     const catTd = document.createElement('td');
     catTd.colSpan = COLS + 2;
-    catTd.textContent = cat.name;
+    const tagBadges = '';
+    catTd.innerHTML = `${cat.name}${tagBadges}<span class="cat-controls"><button class="cat-btn" title="Edit" data-cat-edit="${catIdx}">✏️</button><button class="cat-btn" title="Move Up" data-cat-up="${catIdx}">⬆️</button><button class="cat-btn" title="Move Down" data-cat-down="${catIdx}">⬇️</button></span>`;
+    catTd.querySelector('[data-cat-edit]').addEventListener('click', () => openCatModal(catIdx));
+    catTd.querySelector('[data-cat-up]').addEventListener('click', () => moveCategoryUp(catIdx));
+    catTd.querySelector('[data-cat-down]').addEventListener('click', () => moveCategoryDown(catIdx));
     catRow.appendChild(catTd);
+    catRow.addEventListener('dragover', (e) => { e.preventDefault(); catRow.classList.add('drop-target'); });
+    catRow.addEventListener('dragleave', () => catRow.classList.remove('drop-target'));
+    catRow.addEventListener('drop', (e) => {
+      e.preventDefault();
+      catRow.classList.remove('drop-target');
+      const data = JSON.parse(e.dataTransfer.getData('text/plain') || '{}');
+      if (data.taskId && data.fromCatIdx !== undefined) {
+        moveTaskToCategory(data.taskId, data.fromCatIdx, catIdx);
+      }
+    });
     tbody.appendChild(catRow);
 
     // Task rows
     tasks.forEach((task, taskIdx) => {
       const tr = document.createElement('tr');
       if (task.status === 'done') tr.className = 'completed-row';
+      tr.draggable = true;
+      tr.dataset.taskId = task.id;
+      tr.dataset.catIdx = catIdx;
+      tr.dataset.taskIdx = taskIdx;
+      tr.addEventListener('dragstart', (e) => {
+        if (dragState) { e.preventDefault(); return; }
+        e.dataTransfer.setData('text/plain', JSON.stringify({ taskId: task.id, fromCatIdx: catIdx }));
+        tr.classList.add('task-row-dragging');
+      });
+      tr.addEventListener('dragend', () => tr.classList.remove('task-row-dragging'));
+      tr.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const rect = tr.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        tr.classList.remove('drop-above', 'drop-below');
+        tr.classList.add(e.clientY < mid ? 'drop-above' : 'drop-below');
+      });
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-above', 'drop-below'));
+      tr.addEventListener('drop', (e) => {
+        e.preventDefault();
+        tr.classList.remove('drop-above', 'drop-below');
+        const data = JSON.parse(e.dataTransfer.getData('text/plain') || '{}');
+        if (!data.taskId || data.taskId === task.id) return;
+        const rect = tr.getBoundingClientRect();
+        const above = e.clientY < rect.top + rect.height / 2;
+        reorderTask(data.taskId, data.fromCatIdx, catIdx, taskIdx, above);
+      });
 
       // Name cell
       const nameTd = document.createElement('td');
       const priorityMap = { urgent: 'p-urgent', high: 'p-high', medium: 'p-medium', low: 'p-low' };
       const priorityLabel = { urgent: 'URGENT', high: 'HIGH', medium: 'MED', low: 'LOW' };
-      nameTd.innerHTML = task.name + ` <span class="priority-tag ${priorityMap[task.priority]}">${priorityLabel[task.priority]}</span>`;
-      nameTd.addEventListener('click', () => openEditModal(task, catIdx));
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = task.name + ' ';
+      nameSpan.addEventListener('click', () => openEditModal(task, catIdx));
+      // Show origin label in Action Items
+      if (task._originCat && isActionItems(catIdx)) {
+        const originLabel = document.createElement('span');
+        originLabel.style.cssText = 'font-size:9px; color:#888; background:#f3f4f6; padding:1px 5px; border-radius:3px; margin-left:3px;';
+        originLabel.textContent = '← ' + task._originCat.replace(/^[^\s]+\s/, '');
+        nameSpan.appendChild(originLabel);
+      }
+      const prioTag = document.createElement('span');
+      prioTag.className = `priority-tag ${priorityMap[task.priority]}`;
+      prioTag.textContent = priorityLabel[task.priority];
+      prioTag.style.cursor = 'pointer';
+      prioTag.title = currentLang === 'ko' ? '클릭하여 우선순위 변경' : 'Click to change priority';
+      prioTag.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const cycle = { low: 'medium', medium: 'high', high: 'urgent', urgent: 'low' };
+        task.priority = cycle[task.priority];
+        saveToLocalStorage();
+        render(currentFilter);
+      });
+      nameTd.appendChild(nameSpan);
+      nameTd.appendChild(prioTag);
       tr.appendChild(nameTd);
 
-      // Status cell
+      // Status cell (click to cycle)
       const statusTd = document.createElement('td');
       const statusMap = { done: 's-done', progress: 's-progress', pending: 's-pending' };
-      const statusLabel = { done: '완료', progress: '진행', pending: '미진행' };
-      statusTd.innerHTML = `<span class="status-badge ${statusMap[task.status]}">${statusLabel[task.status]}</span>`;
+      const statusLabel = { done: t('statusDone'), progress: t('statusProgress'), pending: t('statusPending') };
+      const badge = document.createElement('span');
+      badge.className = `status-badge ${statusMap[task.status]}`;
+      badge.textContent = statusLabel[task.status];
+      badge.style.cursor = 'pointer';
+      badge.title = currentLang === 'ko' ? '클릭하여 상태 변경' : 'Click to change status';
+      badge.addEventListener('click', () => {
+        const cycle = { pending: 'progress', progress: 'done', done: 'pending' };
+        task.status = cycle[task.status];
+        // Auto-return to original category when done in Action Items
+        if (task.status === 'done' && task._originCat && isActionItems(catIdx)) {
+          returnToOrigin(task, catIdx);
+        }
+        saveToLocalStorage();
+        render(currentFilter);
+      });
+      statusTd.appendChild(badge);
       tr.appendChild(statusTd);
 
       // Bar cells
@@ -333,10 +644,19 @@ function render(filter) {
         td.className = 'bar-cell';
         if (i === 0) td.classList.add('today-col');
 
+        td.dataset.col = i;
+
         if (i >= startCol && i <= endCol) {
           const bar = document.createElement('div');
-          bar.className = `bar ${task.cls}`;
+          bar.className = 'bar';
+          // Use original category color if in Action Items
+          if (task._originCatIdx !== undefined && isActionItems(catIdx)) {
+            bar.style.background = getCategoryColor(task._originCatIdx);
+          } else {
+            bar.style.background = getCategoryColor(catIdx);
+          }
           bar.style.height = '22px';
+          bar.dataset.taskId = task.id;
 
           if (startCol === endCol) {
             bar.style.borderRadius = '4px';
@@ -352,9 +672,25 @@ function render(filter) {
 
           if (i === startCol) {
             bar.innerHTML = `<div class="tooltip">${task.tip || task.name}</div>`;
+            const leftHandle = document.createElement('div');
+            leftHandle.className = 'bar-handle left';
+            leftHandle.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, task, 'start'); });
+            bar.appendChild(leftHandle);
           }
 
-          bar.addEventListener('click', () => openEditModal(task, catIdx));
+          if (i === endCol) {
+            const rightHandle = document.createElement('div');
+            rightHandle.className = 'bar-handle right';
+            rightHandle.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, task, 'end'); });
+            bar.appendChild(rightHandle);
+          }
+
+          bar.addEventListener('mousedown', (e) => {
+            if (!e.target.classList.contains('bar-handle')) startDrag(e, task, 'move');
+          });
+          bar.addEventListener('click', (e) => {
+            if (!dragMoved) openEditModal(task, catIdx);
+          });
           td.appendChild(bar);
         }
 
@@ -373,16 +709,182 @@ function render(filter) {
   }
 }
 
+// Drag-to-resize/move
+let dragState = null;
+let dragMoved = false;
+
+function colToDate(col) {
+  const d = new Date(BASE_DATE);
+  d.setDate(d.getDate() + col * 7);
+  return d.toISOString().split('T')[0];
+}
+
+function getColFromX(x) {
+  const cells = document.querySelectorAll('#gantt-body tr:not(.category-row):not(.section-divider) td.bar-cell');
+  if (cells.length === 0) return 0;
+  // Get column positions from the first task row
+  const firstRow = document.querySelector('#gantt-body tr:not(.category-row):not(.section-divider)');
+  if (!firstRow) return 0;
+  const barCells = firstRow.querySelectorAll('td.bar-cell');
+  for (let i = 0; i < barCells.length; i++) {
+    const rect = barCells[i].getBoundingClientRect();
+    if (x >= rect.left && x <= rect.right) return i;
+  }
+  // Clamp
+  const firstRect = barCells[0].getBoundingClientRect();
+  if (x < firstRect.left) return 0;
+  return barCells.length - 1;
+}
+
+function startDrag(e, task, mode) {
+  e.preventDefault();
+  dragMoved = false;
+  const startCol = dateToCol(task.start);
+  const endCol = dateToCol(task.end);
+  dragState = { task, mode, startCol, endCol, originX: e.clientX, origStart: startCol, origEnd: endCol };
+  document.body.style.cursor = mode === 'move' ? 'grabbing' : 'ew-resize';
+  document.body.style.userSelect = 'none';
+}
+
+document.addEventListener('mousemove', (e) => {
+  if (!dragState) return;
+  const col = getColFromX(e.clientX);
+  const { task, mode, origStart, origEnd } = dragState;
+  const duration = origEnd - origStart;
+
+  dragMoved = true;
+
+  if (mode === 'start') {
+    const newStart = Math.min(col, origEnd);
+    task.start = colToDate(Math.max(0, newStart));
+  } else if (mode === 'end') {
+    const newEnd = Math.max(col, origStart);
+    task.end = colToDate(Math.min(COLS - 1, newEnd));
+  } else if (mode === 'move') {
+    const delta = col - getColFromX(dragState.originX);
+    const newStart = origStart + delta;
+    const newEnd = origEnd + delta;
+    if (newStart >= 0 && newEnd < COLS) {
+      task.start = colToDate(newStart);
+      task.end = colToDate(newEnd);
+    }
+  }
+
+  render(currentFilter);
+});
+
+document.addEventListener('mouseup', () => {
+  if (dragState) {
+    if (dragMoved) saveToLocalStorage();
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    dragState = null;
+  }
+});
+
 // Render routine section
 function renderRoutine() {
   const routine = allData.routine || {};
-  document.getElementById('routineMorning').textContent = routine.morning || '';
-  document.getElementById('routineAfternoon').textContent = routine.afternoon || '';
-  document.getElementById('routineEvening').textContent = routine.evening || '';
-  document.getElementById('routineRules').textContent = routine.rules || '';
-  document.getElementById('routineSunday').textContent = routine.sunday || '';
-  document.getElementById('routineSaturday').textContent = routine.saturday || '';
-  document.getElementById('routineExercise').textContent = routine.exercise || '';
+  const blocks = routine.blocks || [];
+  const container = document.getElementById('routineContent');
+  container.innerHTML = '';
+
+  blocks.forEach(b => {
+    const label = currentLang === 'en' ? (b.labelEn || b.label) : b.label;
+    const div = document.createElement('div');
+    div.className = 'routine-item';
+    div.innerHTML = `<span class="routine-label">${b.emoji} ${label} (${b.hours}):</span> <span class="routine-text">${b.desc}</span>`;
+    container.appendChild(div);
+  });
+
+  const extras = [
+    { labelKo: '규칙', labelEn: 'Rules', value: routine.rules },
+    { labelKo: '토요일', labelEn: 'Saturday', value: routine.saturday },
+    { labelKo: '일요일', labelEn: 'Sunday', value: routine.sunday },
+    { labelKo: '운동', labelEn: 'Exercise', value: routine.exercise }
+  ];
+  extras.forEach(e => {
+    if (!e.value) return;
+    const label = currentLang === 'en' ? e.labelEn : e.labelKo;
+    const div = document.createElement('div');
+    div.className = 'routine-item';
+    div.innerHTML = `<span class="routine-label">${label}:</span> <span class="routine-text">${e.value}</span>`;
+    container.appendChild(div);
+  });
+}
+
+// Routine edit modal
+function openRoutineModal() {
+  const routine = allData.routine || {};
+  const blocks = routine.blocks || [];
+
+  document.getElementById('rSaturday').value = routine.saturday || '';
+  document.getElementById('rSunday').value = routine.sunday || '';
+  document.getElementById('rRules').value = routine.rules || '';
+  document.getElementById('rExercise').value = routine.exercise || '';
+
+  renderBlocksEditor(blocks);
+  document.getElementById('routineModal').classList.add('active');
+}
+
+function renderBlocksEditor(blocks) {
+  const editor = document.getElementById('routineBlocksEditor');
+  editor.innerHTML = '';
+
+  blocks.forEach((b, i) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:8px; background:#fafbfc;';
+    div.innerHTML = `
+      <div style="display:flex; gap:6px; margin-bottom:6px; align-items:center;">
+        <div class="form-group" style="margin:0; flex:0 0 40px;"><label>Emoji</label><input type="text" class="blk-emoji" value="${b.emoji}" style="text-align:center;"></div>
+        <div class="form-group" style="margin:0; flex:1;"><label>${currentLang === 'ko' ? '라벨 (한)' : 'Label (KO)'}</label><input type="text" class="blk-label" value="${b.label}"></div>
+        <div class="form-group" style="margin:0; flex:1;"><label>${currentLang === 'ko' ? '라벨 (영)' : 'Label (EN)'}</label><input type="text" class="blk-labelEn" value="${b.labelEn || ''}"></div>
+        <div class="form-group" style="margin:0; flex:0 0 70px;"><label>${currentLang === 'ko' ? '시간' : 'Hours'}</label><input type="text" class="blk-hours" value="${b.hours}" placeholder="09-12"></div>
+        <button onclick="this.closest('div[style]').remove()" style="align-self:flex-end; background:#ef4444; color:#fff; border:none; border-radius:4px; padding:6px 8px; cursor:pointer; font-size:11px; margin-bottom:1px;">✕</button>
+      </div>
+      <div class="form-group" style="margin:0;"><label>${currentLang === 'ko' ? '설명' : 'Description'}</label><input type="text" class="blk-desc" value="${b.desc}"></div>
+    `;
+    editor.appendChild(div);
+  });
+}
+
+function addBlock() {
+  const blocks = collectBlocks();
+  blocks.push({ key: 'block' + Date.now(), emoji: '⏰', label: '새 블록', labelEn: 'New Block', hours: '00-00', desc: '' });
+  renderBlocksEditor(blocks);
+}
+
+function collectBlocks() {
+  const editor = document.getElementById('routineBlocksEditor');
+  const blockDivs = editor.querySelectorAll(':scope > div');
+  const blocks = [];
+  blockDivs.forEach((div, i) => {
+    const emoji = div.querySelector('.blk-emoji').value;
+    const label = div.querySelector('.blk-label').value;
+    const labelEn = div.querySelector('.blk-labelEn').value;
+    const hours = div.querySelector('.blk-hours').value;
+    const desc = div.querySelector('.blk-desc').value;
+    const key = label.toLowerCase().replace(/\s+/g, '_');
+    blocks.push({ key, emoji, label, labelEn, hours, desc });
+  });
+  return blocks;
+}
+
+function saveRoutine() {
+  allData.routine = {
+    blocks: collectBlocks(),
+    saturday: document.getElementById('rSaturday').value,
+    sunday: document.getElementById('rSunday').value,
+    rules: document.getElementById('rRules').value,
+    exercise: document.getElementById('rExercise').value
+  };
+  saveToLocalStorage();
+  closeRoutineModal();
+  renderRoutine();
+}
+
+function closeRoutineModal() {
+  document.getElementById('routineModal').classList.remove('active');
 }
 
 // Edit modal
@@ -416,6 +918,284 @@ function saveTask() {
   render(currentFilter);
 }
 
+// Category management
+let editingCatIdx = null;
+
+function getAllTags() {
+  const tags = new Set();
+  (allData.categories || []).forEach(cat => {
+    (cat.tags || []).forEach(tag => {
+      if (!tag.startsWith('divider')) tags.add(tag);
+    });
+  });
+  return [...tags];
+}
+
+function renderTagCheckboxes(selectedTags) {
+  const container = document.getElementById('catTagCheckboxes');
+  container.innerHTML = '';
+  const allTags = getAllTags();
+  allTags.forEach(tag => {
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex; align-items:center; gap:3px; font-size:11px; padding:3px 8px; border:1px solid #ddd; border-radius:12px; cursor:pointer; user-select:none;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = tag;
+    cb.checked = selectedTags.includes(tag);
+    cb.style.cssText = 'margin:0;';
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(tag.toUpperCase()));
+    if (cb.checked) label.style.background = '#e0e7ff';
+    cb.addEventListener('change', () => { label.style.background = cb.checked ? '#e0e7ff' : ''; });
+    container.appendChild(label);
+  });
+}
+
+function getSelectedTags() {
+  const checkboxes = document.querySelectorAll('#catTagCheckboxes input[type="checkbox"]');
+  return [...checkboxes].filter(cb => cb.checked).map(cb => cb.value);
+}
+
+function addCustomTag() {
+  const input = document.getElementById('newTagInput');
+  const tag = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+  if (!tag) return;
+  input.value = '';
+  const current = getSelectedTags();
+  if (!current.includes(tag)) current.push(tag);
+  renderTagCheckboxes(current);
+  // Check the newly added tag
+  const checkboxes = document.querySelectorAll('#catTagCheckboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => {
+    if (cb.value === tag) { cb.checked = true; cb.parentElement.style.background = '#e0e7ff'; }
+  });
+}
+
+function openTagManageModal() {
+  const modal = document.getElementById('tagManageModal');
+  document.getElementById('tagManageModalTitle').textContent = t('tagManageTitle');
+  document.getElementById('tagManageCloseBtn').textContent = t('tagManageClose');
+  renderTagManageList();
+  modal.classList.add('active');
+}
+
+function closeTagManageModal() {
+  document.getElementById('tagManageModal').classList.remove('active');
+}
+
+function renderTagManageList() {
+  const container = document.getElementById('tagManageList');
+  container.innerHTML = '';
+  const tags = getAllTags();
+  if (tags.length === 0) {
+    container.innerHTML = '<div style="color:#888; font-size:12px; padding:12px 0;">' + (currentLang === 'ko' ? '태그가 없습니다.' : 'No tags found.') + '</div>';
+    return;
+  }
+  tags.forEach(tag => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f0f1f3;';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = tag;
+    input.style.cssText = 'flex:1; padding:6px 8px; border:1.5px solid #ddd; border-radius:6px; font-size:12px; font-family:inherit;';
+    input.dataset.originalTag = tag;
+    const renameBtn = document.createElement('button');
+    renameBtn.textContent = t('tagManageRename');
+    renameBtn.style.cssText = 'padding:5px 10px; background:#6366f1; color:#fff; border:none; border-radius:6px; font-size:11px; cursor:pointer; font-family:inherit; white-space:nowrap;';
+    renameBtn.addEventListener('click', () => {
+      const newTag = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+      if (!newTag || newTag === tag) return;
+      renameTagGlobally(tag, newTag);
+    });
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '❌';
+    deleteBtn.style.cssText = 'padding:5px 8px; background:none; border:none; font-size:13px; cursor:pointer;';
+    deleteBtn.addEventListener('click', () => {
+      const msg = t('tagDeleteConfirm').replace('{tag}', tag);
+      if (!confirm(msg)) return;
+      deleteTagGlobally(tag);
+    });
+    row.appendChild(input);
+    row.appendChild(renameBtn);
+    row.appendChild(deleteBtn);
+    container.appendChild(row);
+  });
+}
+
+function renameTagGlobally(oldTag, newTag) {
+  (allData.categories || []).forEach(cat => {
+    if (!cat.tags) return;
+    const idx = cat.tags.indexOf(oldTag);
+    if (idx !== -1) {
+      cat.tags[idx] = newTag;
+    }
+  });
+  if (currentFilter === oldTag) currentFilter = newTag;
+  saveToLocalStorage();
+  buildTagFilters();
+  render(currentFilter);
+  renderTagManageList();
+}
+
+function deleteTagGlobally(tag) {
+  (allData.categories || []).forEach(cat => {
+    if (!cat.tags) return;
+    cat.tags = cat.tags.filter(t => t !== tag);
+  });
+  if (currentFilter === tag) currentFilter = 'all';
+  saveToLocalStorage();
+  buildTagFilters();
+  render(currentFilter);
+  renderTagManageList();
+}
+
+function openCatModal(catIdx) {
+  editingCatIdx = catIdx;
+  const cat = allData.categories[catIdx];
+  document.getElementById('catName').value = cat.name;
+  renderTagCheckboxes(cat.tags || []);
+  document.getElementById('catModalTitle').textContent = currentLang === 'ko' ? '카테고리 편집' : 'Edit Category';
+  document.getElementById('deleteCatBtn').style.display = '';
+  document.getElementById('catModal').classList.add('active');
+}
+
+function openAddCatModal() {
+  editingCatIdx = null;
+  document.getElementById('catName').value = '';
+  renderTagCheckboxes([]);
+  document.getElementById('catModalTitle').textContent = currentLang === 'ko' ? '새 카테고리' : 'New Category';
+  document.getElementById('deleteCatBtn').style.display = 'none';
+  document.getElementById('catModal').classList.add('active');
+}
+
+function closeCatModal() {
+  document.getElementById('catModal').classList.remove('active');
+  editingCatIdx = null;
+}
+
+function saveCategory() {
+  const name = document.getElementById('catName').value.trim();
+  const tags = getSelectedTags();
+  if (!name) return;
+
+  if (editingCatIdx !== null) {
+    allData.categories[editingCatIdx].name = name;
+    allData.categories[editingCatIdx].tags = tags;
+    delete allData.categories[editingCatIdx].section;
+  } else {
+    allData.categories.push({ name, tags, tasks: [] });
+  }
+  saveToLocalStorage();
+  closeCatModal();
+  buildTagFilters();
+  render(currentFilter);
+}
+
+function deleteCategory() {
+  if (editingCatIdx === null) return;
+  const cat = allData.categories[editingCatIdx];
+  const msg = currentLang === 'ko'
+    ? `"${cat.name}" 카테고리를 삭제하시겠습니까? (${cat.tasks.length}개 태스크 포함)`
+    : `Delete "${cat.name}"? (${cat.tasks.length} tasks inside)`;
+  if (!confirm(msg)) return;
+  allData.categories.splice(editingCatIdx, 1);
+  saveToLocalStorage();
+  closeCatModal();
+  render(currentFilter);
+}
+
+function moveCategoryUp(catIdx) {
+  if (catIdx <= 0) return;
+  const cats = allData.categories;
+  [cats[catIdx - 1], cats[catIdx]] = [cats[catIdx], cats[catIdx - 1]];
+  saveToLocalStorage();
+  render(currentFilter);
+}
+
+function moveCategoryDown(catIdx) {
+  const cats = allData.categories;
+  if (catIdx >= cats.length - 1) return;
+  [cats[catIdx], cats[catIdx + 1]] = [cats[catIdx + 1], cats[catIdx]];
+  saveToLocalStorage();
+  render(currentFilter);
+}
+
+function isActionItems(catIdx) {
+  const cat = allData.categories[catIdx];
+  return cat && cat.name && cat.name.includes('Action Items');
+}
+
+function moveTaskToCategory(taskId, fromCatIdx, toCatIdx) {
+  if (fromCatIdx === toCatIdx) return;
+  const fromCat = allData.categories[fromCatIdx];
+  const toCat = allData.categories[toCatIdx];
+  if (!fromCat || !toCat) return;
+  const taskIdx = fromCat.tasks.findIndex(t => t.id === taskId);
+  if (taskIdx < 0) return;
+  const [task] = fromCat.tasks.splice(taskIdx, 1);
+
+  // Track origin when moving TO Action Items
+  if (isActionItems(toCatIdx) && !isActionItems(fromCatIdx)) {
+    task._originCat = fromCat.name;
+    task._originCatIdx = fromCatIdx;
+  }
+  // Clear origin when moving OUT of Action Items (manual move)
+  if (!isActionItems(toCatIdx) && task._originCat) {
+    delete task._originCat;
+    delete task._originCatIdx;
+  }
+
+  toCat.tasks.push(task);
+  saveToLocalStorage();
+  render(currentFilter);
+}
+
+function reorderTask(taskId, fromCatIdx, toCatIdx, targetTaskIdx, above) {
+  const fromCat = allData.categories[fromCatIdx];
+  if (!fromCat) return;
+  const srcIdx = fromCat.tasks.findIndex(t => t.id === taskId);
+  if (srcIdx < 0) return;
+  const [task] = fromCat.tasks.splice(srcIdx, 1);
+
+  const toCat = allData.categories[toCatIdx];
+
+  // Track origin when moving TO Action Items
+  if (isActionItems(toCatIdx) && !isActionItems(fromCatIdx)) {
+    task._originCat = fromCat.name;
+    task._originCatIdx = fromCatIdx;
+  }
+  if (!isActionItems(toCatIdx) && task._originCat) {
+    delete task._originCat;
+    delete task._originCatIdx;
+  }
+
+  let insertIdx = targetTaskIdx;
+  if (fromCatIdx === toCatIdx && srcIdx < targetTaskIdx) insertIdx--;
+  if (!above) insertIdx++;
+  toCat.tasks.splice(insertIdx, 0, task);
+
+  saveToLocalStorage();
+  render(currentFilter);
+}
+
+// Return done tasks from Action Items to their original category
+function returnToOrigin(task, currentCatIdx) {
+  if (!task._originCat) return false;
+  // Find original category by name (index may have shifted)
+  let originIdx = allData.categories.findIndex(c => c.name === task._originCat);
+  if (originIdx < 0 || originIdx === currentCatIdx) return false;
+
+  const currentCat = allData.categories[currentCatIdx];
+  const taskIdx = currentCat.tasks.findIndex(t => t.id === task.id);
+  if (taskIdx < 0) return false;
+
+  const [removed] = currentCat.tasks.splice(taskIdx, 1);
+  delete removed._originCat;
+  delete removed._originCatIdx;
+  allData.categories[originIdx].tasks.push(removed);
+  return true;
+}
+
 function deleteTask() {
   if (!editingCategoryIdx && editingCategoryIdx !== 0) return;
   const category = allData.categories[editingCategoryIdx];
@@ -438,6 +1218,50 @@ function findTask(taskId) {
 
 function saveToLocalStorage() {
   localStorage.setItem('gantt-data', JSON.stringify(allData));
+  // Auto-save to server (fire and forget)
+  autoSaveToServer();
+}
+
+let autoSaveTimer = null;
+function autoSaveToServer() {
+  // Debounce: wait 1s after last change before saving
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    fetch('/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(allData, null, 2)
+    }).then(resp => {
+      if (resp.ok) {
+        const btn = document.getElementById('saveBtn');
+        const orig = btn.textContent;
+        btn.textContent = '✅';
+        btn.style.background = '#059669';
+        setTimeout(() => { btn.textContent = orig; btn.style.background = '#10b981'; }, 800);
+      }
+    }).catch(() => { /* server not running, silent fail */ });
+  }, 1000);
+}
+
+async function saveToServer() {
+  try {
+    const resp = await fetch('/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(allData, null, 2)
+    });
+    if (resp.ok) {
+      const btn = document.getElementById('saveBtn');
+      const orig = btn.textContent;
+      btn.textContent = currentLang === 'ko' ? '✅ 저장 완료!' : '✅ Saved!';
+      btn.style.background = '#059669';
+      setTimeout(() => { btn.textContent = orig; btn.style.background = '#10b981'; }, 1500);
+    } else {
+      alert(currentLang === 'ko' ? '저장 실패. 서버를 확인하세요.' : 'Save failed. Check the server.');
+    }
+  } catch (e) {
+    alert(currentLang === 'ko' ? '서버에 연결할 수 없습니다. server.py를 실행하세요.' : 'Cannot connect to server. Run server.py.');
+  }
 }
 
 function exportJSON() {
@@ -452,23 +1276,35 @@ function exportJSON() {
 }
 
 function resetData() {
-  if (confirm('정말 초기화하시겠습니까? 모든 변경 사항이 삭제됩니다.')) {
+  const msg = currentLang === 'ko'
+    ? '정말 초기화하시겠습니까?\n\n⚠️ tasks.json 파일에 마지막으로 저장된 상태로 돌아갑니다.\n저장하지 않은 변경 사항은 사라집니다.'
+    : 'Are you sure you want to reset?\n\n⚠️ This will reload from the last saved tasks.json.\nUnsaved changes will be lost.';
+  if (confirm(msg)) {
     localStorage.removeItem('gantt-data');
     location.reload();
   }
 }
 
-// Filter buttons
+// Filter buttons (toggle: click again to go back to all)
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
+    const filter = btn.dataset.filter;
+    if (filter === 'all' || currentFilter !== filter) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = filter;
+    } else {
+      // Click same filter again → back to all
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+      currentFilter = 'all';
+    }
     render(currentFilter);
   });
 });
 
 // Action buttons
+document.getElementById('saveBtn').addEventListener('click', saveToServer);
 document.getElementById('exportBtn').addEventListener('click', exportJSON);
 document.getElementById('resetBtn').addEventListener('click', resetData);
 document.getElementById('deleteBtn').addEventListener('click', deleteTask);
@@ -476,6 +1312,27 @@ document.getElementById('deleteBtn').addEventListener('click', deleteTask);
 // Modal overlay click to close
 document.getElementById('editModal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('editModal')) closeModal();
+});
+
+// Category buttons
+document.getElementById('addCatBtn').addEventListener('click', openAddCatModal);
+document.getElementById('deleteCatBtn').addEventListener('click', deleteCategory);
+document.getElementById('catModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('catModal')) closeCatModal();
+});
+
+// Routine buttons
+document.getElementById('editRoutineBtn').addEventListener('click', openRoutineModal);
+document.getElementById('addBlockBtn').addEventListener('click', addBlock);
+document.getElementById('routineModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('routineModal')) closeRoutineModal();
+});
+
+// Language toggle
+document.getElementById('langToggle').addEventListener('click', () => {
+  currentLang = currentLang === 'ko' ? 'en' : 'ko';
+  localStorage.setItem('gantt-lang', currentLang);
+  applyLang();
 });
 
 // Initialize
