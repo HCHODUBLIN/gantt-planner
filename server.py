@@ -5,11 +5,17 @@ import json
 import os
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
-PORT = 8080
+PORT = 8090
 TASKS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.json')
 
 
 class Handler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
+        super().end_headers()
+
     def do_POST(self):
         if self.path == '/save':
             length = int(self.headers.get('Content-Length', 0))

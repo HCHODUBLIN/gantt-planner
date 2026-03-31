@@ -3,115 +3,160 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>업무 간트 차트 2026</title>
+<title>Gantt Planner 2026</title>
 <style>
+  /* Notion-inspired color scheme */
+  :root {
+    --bg: #FFFFFF; --text: #373530; --text-secondary: #787774; --text-muted: #9B9A97;
+    --surface: #FFFFFF; --surface-alt: #F7F6F3; --surface-hover: #F1F1EF;
+    --border: #E9E9E7; --border-light: #F1F1EF;
+    --cat-bg: #F7F6F3; --cat-text: #373530;
+    --accent: #2EAADC; --accent-light: rgba(46,170,220,0.08);
+    --shadow: rgba(15,15,15,0.04); --shadow-strong: rgba(15,15,15,0.1);
+    --today-bg: #FAECEC; --divider-bg: #E9E9E7;
+    --input-border: #E9E9E7; --input-bg: #FFFFFF;
+    --modal-bg: #FFFFFF; --overlay: rgba(15,15,15,0.6);
+    --grid-line: rgba(55,53,48,0.06);
+  }
+  body.dark {
+    --bg: #191919; --text: #D4D4D4; --text-secondary: #9B9B9B; --text-muted: #6B6B6B;
+    --surface: #202020; --surface-alt: #252525; --surface-hover: #2F2F2F;
+    --border: #333333; --border-light: #2A2A2A;
+    --cat-bg: #252525; --cat-text: #D4D4D4;
+    --accent: #447ACB; --accent-light: rgba(68,122,203,0.15);
+    --shadow: rgba(0,0,0,0.3); --shadow-strong: rgba(0,0,0,0.5);
+    --today-bg: #332523; --divider-bg: #333333;
+    --input-border: #404040; --input-bg: #252525;
+    --modal-bg: #252525; --overlay: rgba(0,0,0,0.7);
+    --grid-line: rgba(255,255,255,0.04);
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f7fa; color: #333; padding: 24px; }
-  h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; color: #1a1a2e; }
-  .subtitle { font-size: 13px; color: #888; margin-bottom: 20px; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding: 24px; transition: background 0.3s, color 0.3s; }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; color: var(--cat-text); }
+  .subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
   .legend { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: #555; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-secondary); }
   .legend-color { width: 13px; height: 13px; border-radius: 3px; }
   .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-  .filter-btn { padding: 5px 12px; border-radius: 6px; border: 1.5px solid #ddd; background: #fff; font-size: 11.5px; cursor: pointer; transition: all 0.15s; color: #555; }
+  .filter-btn { padding: 5px 12px; border-radius: 6px; border: 1.5px solid var(--input-border); background: var(--surface); font-size: 11.5px; cursor: pointer; transition: all 0.15s; color: var(--text-secondary); }
   .filter-btn:hover { border-color: #999; }
-  .filter-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
-  .filter-btn.p-filter.active { box-shadow: 0 0 0 2px #1a1a2e; font-weight: 700; }
-  .action-btn { padding: 5px 12px; border-radius: 6px; border: 1.5px solid #ddd; background: #fff; font-size: 11.5px; cursor: pointer; transition: all 0.15s; color: #555; text-decoration: none; display: inline-flex; align-items: center; }
+  .filter-btn.active { border-width: 2.5px; border-color: var(--text); font-weight: 700; box-shadow: 0 0 0 1px var(--text); }
+  .filter-btn.p-filter.active { box-shadow: 0 0 0 2px var(--accent); font-weight: 700; }
+  .action-btn { padding: 5px 12px; border-radius: 6px; border: 1.5px solid var(--input-border); background: var(--surface); font-size: 11.5px; cursor: pointer; transition: all 0.15s; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; }
   .action-btn:hover { border-color: #999; }
   .action-btn.save { background: #10b981; color: #fff; border-color: #10b981; }
   .action-btn.save:hover { background: #059669; }
-  .action-btn.export { background: #6366f1; color: #fff; border-color: #6366f1; }
-  .action-btn.reset { background: #fca5a5; border-color: #ef4444; color: #333; }
-  .action-btn.weekly { background: #6366f1; color: #fff; border-color: #6366f1; }
-  .gantt-container { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow-x: auto; }
+  .action-btn.export { background: #487CA5; color: #fff; border-color: #487CA5; }
+  .action-btn.reset { background: #FAECEC; border-color: #C4554D; color: #C4554D; }
+  .action-btn.weekly { background: #487CA5; color: #fff; border-color: #487CA5; }
+  .gantt-container { background: var(--surface); border-radius: 12px; box-shadow: 0 2px 12px var(--shadow); overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; min-width: 1200px; }
-  thead th { position: sticky; top: 0; background: #f8f9fb; font-size: 10.5px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 6px; border-bottom: 2px solid #e8eaed; text-align: center; z-index: 5; }
-  thead th:first-child { text-align: left; padding-left: 14px; min-width: 300px; position: sticky; left: 0; z-index: 10; background: #f8f9fb; }
-  thead th:nth-child(2) { min-width: 70px; text-align: center; position: sticky; left: 300px; z-index: 10; background: #f8f9fb; }
-  .week-markers th:first-child { position: sticky; left: 0; z-index: 10; background: #f8f9fb; }
-  .week-markers th:nth-child(2) { position: sticky; left: 300px; z-index: 10; background: #f8f9fb; }
+  thead th { position: sticky; top: 0; background: var(--surface-alt); font-size: 10.5px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 6px; border-bottom: 2px solid var(--border); text-align: center; z-index: 5; }
+  thead th:first-child { text-align: left; padding-left: 14px; min-width: 300px; position: sticky; left: 0; z-index: 10; background: var(--surface-alt); }
+  thead th:nth-child(2) { min-width: 70px; text-align: center; position: sticky; left: 300px; z-index: 10; background: var(--surface-alt); }
+  .week-markers th:first-child { position: sticky; left: 0; z-index: 10; background: var(--surface-alt); }
+  .week-markers th:nth-child(2) { position: sticky; left: 300px; z-index: 10; background: var(--surface-alt); }
   thead th.month { min-width: 46px; }
-  .category-row td { background: #f0f2f5; font-weight: 700; font-size: 12.5px; color: #1a1a2e; padding: 9px 14px; border-bottom: 1px solid #e0e3e8; }
-  .category-row td:first-child { position: sticky; left: 0; z-index: 3; background: #f0f2f5; }
-  tbody td { padding: 0; border-bottom: 1px solid #f0f1f3; height: 36px; position: relative; }
-  tbody td:first-child { padding: 6px 10px 6px 20px; font-size: 12px; color: #444; white-space: nowrap; position: sticky; left: 0; background: #fff; z-index: 2; cursor: pointer; }
-  tbody td:nth-child(2) { position: sticky; left: 300px; background: #fff; z-index: 2; text-align: center; }
-  tr:hover td:first-child, tr:hover td:nth-child(2) { background: #fafbfc; }
-  .bar-cell { padding: 6px 1px !important; }
-  .bar { height: 22px; border-radius: 4px; position: relative; cursor: grab; display: flex; align-items: center; justify-content: center; }
-  .bar:hover { filter: brightness(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .category-row td { background: var(--cat-bg); font-weight: 700; font-size: 12.5px; color: var(--cat-text); padding: 9px 14px; border-bottom: 1px solid var(--border); }
+  .category-row td:first-child { position: sticky; left: 0; z-index: 3; background: var(--cat-bg); }
+  tbody td { padding: 0; border-bottom: 1px solid var(--border-light); height: 36px; position: relative; }
+  tbody td:first-child { padding: 6px 10px 6px 20px; font-size: 12px; color: var(--text-secondary); white-space: nowrap; position: sticky; left: 0; background: var(--surface); z-index: 2; cursor: pointer; }
+  tbody td:nth-child(2) { position: sticky; left: 300px; background: var(--surface); z-index: 2; text-align: center; }
+  tr:hover td:first-child, tr:hover td:nth-child(2) { background: var(--surface-hover); }
+  .bar-cell { padding: 4px 1px !important; }
+  .bar { height: 14px; border-radius: 3px; position: relative; cursor: grab; display: flex; align-items: center; justify-content: center; }
+  .bar:hover { filter: brightness(1.15); box-shadow: 0 2px 8px var(--shadow-strong); }
   .bar-handle { position: absolute; top: 0; width: 7px; height: 100%; cursor: ew-resize; z-index: 4; }
   .bar-handle:hover, .bar-handle.active { background: rgba(255,255,255,0.4); }
   .bar-handle.left { left: 0; border-radius: 4px 0 0 4px; }
   .bar-handle.right { right: 0; border-radius: 0 4px 4px 0; }
   .bar.dragging { opacity: 0.7; cursor: grabbing; }
-  .col-highlight { background: rgba(99,102,241,0.1) !important; }
+  .col-highlight { background: var(--accent-light) !important; }
   .task-row-dragging { opacity: 0.4; }
   .category-row.drop-target td { background: #dbeafe !important; border-bottom: 3px solid #6366f1 !important; }
   tr.drop-above td { border-top: 3px solid #6366f1 !important; }
   tr.drop-below td { border-bottom: 3px solid #6366f1 !important; }
   .priority-tag { display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
-  .p-urgent { background: #fee2e2; color: #dc2626; }
-  .p-high { background: #ffedd5; color: #ea580c; }
-  .p-medium { background: #fef9c3; color: #a16207; }
-  .p-low { background: #dcfce7; color: #16a34a; }
+  .pin-action-btn { border: none; background: none; cursor: pointer; font-size: 11px; padding: 0 3px; opacity: 0; transition: opacity 0.15s; vertical-align: middle; margin-left: 2px; }
+  tr:hover .pin-action-btn { opacity: 0.6; }
+  .pin-action-btn:hover { opacity: 1 !important; transform: scale(1.2); }
+  .p-urgent { background: #FAECEC; color: #C4554D; }
+  .p-high { background: #F8ECDF; color: #CC782F; }
+  .p-medium { background: #FAF3DD; color: #C29343; }
+  .p-low { background: #EEF3ED; color: #548164; }
+  body.dark .p-urgent { background: #332523; color: #BE524B; }
+  body.dark .p-high { background: #36291F; color: #CB7B37; }
+  body.dark .p-medium { background: #372E20; color: #C19138; }
+  body.dark .p-low { background: #242B26; color: #4F9768; }
   .status-badge { display: inline-block; font-size: 9px; font-weight: 600; padding: 1px 6px; border-radius: 10px; }
-  .s-done { background: #e0e7ff; color: #4338ca; }
-  .s-progress { background: #dbeafe; color: #2563eb; }
-  .s-pending { background: #f3f4f6; color: #6b7280; }
+  .s-done { background: #EEF3ED; color: #548164; }
+  .s-progress { background: #E9F3F7; color: #487CA5; }
+  .s-pending { background: #F1F1EF; color: #787774; }
+  body.dark .s-done { background: #242B26; color: #4F9768; }
+  body.dark .s-progress { background: #1F282D; color: #447ACB; }
+  body.dark .s-pending { background: #252525; color: #9B9B9B; }
   /* Category bar colors are set dynamically via JS */
-  .tooltip { display: none; position: absolute; background: #1a1a2e; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 11px; z-index: 100; white-space: nowrap; bottom: 110%; left: 50%; transform: translateX(-50%); pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-  .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1a1a2e; }
+  .tooltip { display: none; position: absolute; background: var(--accent); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 11px; z-index: 100; white-space: nowrap; bottom: 110%; left: 50%; transform: translateX(-50%); pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--accent); }
   .bar:hover .tooltip { display: block; }
-  tr:hover td { background: #fafbfc; }
-  .category-row:hover td { background: #f0f2f5; }
-  .week-markers th { font-size: 9px; color: #aaa; font-weight: 400; padding: 2px 6px; border-bottom: 1px solid #e8eaed; }
-  .today-col { background: #fef2f2 !important; }
-  .section-divider td { height: 8px; background: #e8eaed; padding: 0; border: none; }
-  .completed-row td:first-child { color: #aaa; text-decoration: line-through; }
+  tr:hover td { background: var(--surface-hover); }
+  .category-row:hover td { background: var(--cat-bg); }
+  .week-markers th { font-size: 9px; color: var(--text-muted); font-weight: 400; padding: 2px 6px; border-bottom: 1px solid var(--border); }
+  .today-col { background: var(--today-bg) !important; }
+  .section-divider td { height: 8px; background: var(--divider-bg); padding: 0; border: none; }
+  .completed-row td:first-child { color: var(--text-muted); text-decoration: line-through; }
   .completed-row .bar { opacity: 0.4; }
 
   /* Category controls */
   .cat-controls { float: right; display: none; gap: 4px; }
   .category-row:hover .cat-controls { display: inline-flex; }
-  .cat-btn { background: none; border: none; cursor: pointer; font-size: 11px; padding: 2px 5px; border-radius: 3px; color: #666; }
-  .cat-btn:hover { background: rgba(0,0,0,0.08); }
+  .cat-btn { background: none; border: none; cursor: pointer; font-size: 11px; padding: 2px 5px; border-radius: 3px; color: var(--text-muted); }
+  .cat-btn:hover { background: rgba(128,128,128,0.15); }
 
-  /* Language toggle */
-  .lang-toggle { position: fixed; top: 16px; right: 24px; z-index: 500; display: flex; align-items: center; background: #fff; border: 1.5px solid #ddd; border-radius: 20px; padding: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; }
-  .lang-toggle span { padding: 4px 10px; font-size: 11.5px; font-weight: 600; border-radius: 16px; transition: all 0.2s; color: #888; }
-  .lang-toggle span.active { background: #1a1a2e; color: #fff; }
+  /* Toggle group */
+  .toggle-group { position: fixed; top: 16px; right: 24px; z-index: 500; display: flex; gap: 8px; }
+  .toggle-pill { display: flex; align-items: center; background: var(--surface); border: 1.5px solid var(--input-border); border-radius: 20px; padding: 3px; box-shadow: 0 2px 8px var(--shadow); cursor: pointer; }
+  .toggle-pill span { padding: 4px 10px; font-size: 11.5px; font-weight: 600; border-radius: 16px; transition: all 0.2s; color: var(--text-muted); }
+  .toggle-pill span.active { background: var(--accent); color: #fff; }
 
   /* Routine section */
-  .routine-section { margin-top: 20px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 16px 20px; font-size: 12px; }
-  .routine-section h3 { font-size: 14px; margin-bottom: 10px; color: #1a1a2e; }
+  .routine-section { margin-top: 20px; background: var(--surface); border-radius: 12px; box-shadow: 0 2px 12px var(--shadow); padding: 16px 20px; font-size: 12px; }
+  .routine-section h3 { font-size: 14px; margin-bottom: 10px; color: var(--cat-text); }
   .routine-item { margin-bottom: 6px; line-height: 1.5; }
-  .routine-label { font-weight: 600; color: #333; display: inline-block; min-width: 70px; }
-  .routine-text { color: #555; }
+  .routine-label { font-weight: 600; color: var(--text); display: inline-block; min-width: 70px; }
+  .routine-text { color: var(--text-secondary); }
 
   /* Modal styles */
-  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--overlay); z-index: 1000; justify-content: center; align-items: center; }
   .modal-overlay.active { display: flex; }
-  .modal-content { background: white; border-radius: 12px; padding: 24px; max-width: 500px; width: 90%; box-shadow: 0 20px 25px rgba(0,0,0,0.15); }
-  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #1a1a2e; }
+  .modal-content { background: var(--modal-bg); border-radius: 12px; padding: 24px; max-width: 500px; width: 90%; box-shadow: 0 20px 25px var(--shadow-strong); }
+  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--cat-text); }
   .form-group { margin-bottom: 12px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #333; }
-  .form-group input, .form-group select { width: 100%; padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 12px; font-family: inherit; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+  .form-group input, .form-group select { width: 100%; padding: 8px 10px; border: 1.5px solid var(--input-border); border-radius: 6px; font-size: 12px; font-family: inherit; background: var(--input-bg); color: var(--text); }
   .form-group input:focus, .form-group select:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
   .modal-buttons { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
-  .modal-buttons button { padding: 8px 16px; border-radius: 6px; border: 1.5px solid #ddd; background: #fff; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .modal-buttons button { padding: 8px 16px; border-radius: 6px; border: 1.5px solid var(--input-border); background: var(--surface); font-size: 12px; cursor: pointer; font-family: inherit; color: var(--text); }
   .modal-buttons .delete-btn { background: #ef4444; color: white; border-color: #ef4444; }
   .modal-buttons .delete-btn:hover { background: #dc2626; }
-  .modal-buttons .save-btn { background: #6366f1; color: white; border-color: #6366f1; }
-  .modal-buttons .save-btn:hover { background: #4f46e5; }
+  .modal-buttons .save-btn { background: #2EAADC; color: white; border-color: #2EAADC; }
+  .modal-buttons .save-btn:hover { background: #2496C4; }
+
+  /* Dark mode: bar grid lines */
+  body.dark .bar-cell { border-right: 1px solid var(--grid-line); }
 </style>
 </head>
 <body>
 
-<div class="lang-toggle" id="langToggle">
-  <span id="langEN">EN</span>
-  <span id="langKO" class="active">KO</span>
+<div class="toggle-group">
+  <div class="toggle-pill" id="themeToggle">
+    <span id="themeLight" class="active">Light</span>
+    <span id="themeDark">Dark</span>
+  </div>
+  <div class="toggle-pill" id="langToggle">
+    <span id="langEN">EN</span>
+    <span id="langKO" class="active">KO</span>
+  </div>
 </div>
 
 <h1 id="pageTitle">업무 간트 차트 2026</h1>
@@ -119,17 +164,17 @@
 
 <div class="filter-bar">
   <button class="filter-btn active" data-filter="all">전체</button>
-  <button class="filter-btn" data-filter="active" style="background:#dbeafe; color:#2563eb; border-color:#bfdbfe;">진행중</button>
-  <button class="filter-btn" data-filter="pending" style="background:#f3f4f6; color:#6b7280; border-color:#e5e7eb;">미진행</button>
-  <button class="filter-btn" data-filter="done" style="background:#e0e7ff; color:#4338ca; border-color:#c7d2fe;">완료</button>
+  <button class="filter-btn" data-filter="active" style="background:#E9F3F7; color:#487CA5; border-color:#D3E6EF;">진행중</button>
+  <button class="filter-btn" data-filter="pending" style="background:#F1F1EF; color:#787774; border-color:#E9E9E7;">미진행</button>
+  <button class="filter-btn" data-filter="done" style="background:#EEF3ED; color:#548164; border-color:#DEE9DD;">완료</button>
   <span id="tagFilters"></span><button class="action-btn" id="manageTagsBtn" onclick="openTagManageModal()" style="padding:3px 7px; font-size:11px; margin-left:2px;" title="태그 관리">⚙️</button>
   <span style="color:#ccc; margin:0 4px;">|</span>
-  <button class="filter-btn p-filter" data-filter="p-urgent" style="background:#fee2e2; color:#dc2626; border-color:#fca5a5;">URGENT</button>
-  <button class="filter-btn p-filter" data-filter="p-high" style="background:#ffedd5; color:#ea580c; border-color:#fed7aa;">HIGH</button>
-  <button class="filter-btn p-filter" data-filter="p-medium" style="background:#fef9c3; color:#a16207; border-color:#fde68a;">MED</button>
-  <button class="filter-btn p-filter" data-filter="p-low" style="background:#dcfce7; color:#16a34a; border-color:#bbf7d0;">LOW</button>
+  <button class="filter-btn p-filter" data-filter="p-urgent" style="background:#FAECEC; color:#C4554D; border-color:#F0D6D6;">URGENT</button>
+  <button class="filter-btn p-filter" data-filter="p-high" style="background:#F8ECDF; color:#CC782F; border-color:#EDD9C8;">HIGH</button>
+  <button class="filter-btn p-filter" data-filter="p-medium" style="background:#FAF3DD; color:#C29343; border-color:#EDE5C8;">MED</button>
+  <button class="filter-btn p-filter" data-filter="p-low" style="background:#EEF3ED; color:#548164; border-color:#DEE9DD;">LOW</button>
   <a href="weekly.html" class="action-btn weekly" style="margin-left: auto;">📅 주간 플래너</a>
-  <button class="action-btn" id="addCatBtn" style="background:#8b5cf6; color:#fff; border-color:#8b5cf6;">+ 카테고리</button>
+  <button class="action-btn" id="addCatBtn" style="background:#8A67AB; color:#fff; border-color:#8A67AB;">+ 카테고리</button>
   <button class="action-btn save" id="saveBtn">💾 저장</button>
   <button class="action-btn export" id="exportBtn">JSON 다운로드</button>
   <button class="action-btn reset" id="resetBtn">초기화</button>
@@ -238,7 +283,7 @@ const BASE_DATE = new Date(2026, 2, 23); // Mar 23, 2026
 const COLS = 29; // 29 weeks: Mar 23 ~ Sep 28
 
 let allData = {};
-let currentFilter = 'all';
+let currentFilter = new Set(['all']);
 let editingTaskId = null;
 let editingCategoryIdx = null;
 let currentLang = localStorage.getItem('gantt-lang') || 'ko';
@@ -329,7 +374,7 @@ function applyLang() {
 
   // Modal
   document.querySelector('.modal-title').textContent = t('modalTitle');
-  const formLabels = document.querySelectorAll('.form-group label');
+  const formLabels = document.querySelectorAll('#editModal .form-group label');
   const formKeys = ['labelName','labelStatus','labelPriority','labelStart','labelEnd'];
   formLabels.forEach((el, i) => { if (formKeys[i]) el.textContent = t(formKeys[i]); });
 
@@ -441,45 +486,55 @@ function buildTagFilters() {
     btn.className = 'filter-btn';
     btn.dataset.filter = tag;
     btn.textContent = tag.toUpperCase();
-    if (currentFilter === tag) btn.classList.add('active');
+    if (currentFilter.has(tag)) btn.classList.add('active');
     btn.addEventListener('click', () => {
-      if (currentFilter === tag) {
-        // Toggle off — go back to all
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
-        currentFilter = 'all';
-      } else {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = tag;
-      }
-      render(currentFilter);
+      toggleFilter(tag);
     });
     container.appendChild(btn);
   });
 }
 
-// Category color palette (cool tones — won't conflict with urgency red/orange/yellow/green)
-const catColors = [
-  'linear-gradient(135deg, #3b82f6, #60a5fa)',  // blue
-  'linear-gradient(135deg, #8b5cf6, #a78bfa)',  // violet
-  'linear-gradient(135deg, #06b6d4, #22d3ee)',  // cyan
-  'linear-gradient(135deg, #ec4899, #f472b6)',  // pink
-  'linear-gradient(135deg, #6366f1, #818cf8)',  // indigo
-  'linear-gradient(135deg, #0ea5e9, #38bdf8)',  // sky
-  'linear-gradient(135deg, #14b8a6, #2dd4bf)',  // teal
-  'linear-gradient(135deg, #a855f7, #c084fc)',  // purple
-  'linear-gradient(135deg, #64748b, #94a3b8)',  // slate
-  'linear-gradient(135deg, #0284c7, #0ea5e9)',  // blue-dark
-  'linear-gradient(135deg, #7c3aed, #8b5cf6)',  // violet-dark
-  'linear-gradient(135deg, #0d9488, #14b8a6)',  // teal-dark
-  'linear-gradient(135deg, #be185d, #ec4899)',  // rose
-  'linear-gradient(135deg, #4f46e5, #6366f1)',  // indigo-dark
-  'linear-gradient(135deg, #475569, #64748b)',  // slate-dark
+// Category color palette — light mode (Notion-inspired muted tones)
+const catColorsLight = [
+  'linear-gradient(135deg, #487CA5, #5A93BE)',  // notion blue
+  'linear-gradient(135deg, #548164, #6A9A7A)',  // notion green
+  'linear-gradient(135deg, #CC782F, #D99050)',  // notion orange
+  'linear-gradient(135deg, #8A67AB, #9E80BF)',  // notion purple
+  'linear-gradient(135deg, #B35488, #C46E9C)',  // notion pink
+  'linear-gradient(135deg, #C29343, #D0A55C)',  // notion yellow
+  'linear-gradient(135deg, #976D57, #AB846E)',  // notion brown
+  'linear-gradient(135deg, #C4554D, #D06C65)',  // notion red
+  'linear-gradient(135deg, #787774, #908F8C)',  // notion gray
+  'linear-gradient(135deg, #4A9B8E, #5DAFA2)',  // teal
+  'linear-gradient(135deg, #5E81AC, #7494BA)',  // steel blue
+  'linear-gradient(135deg, #8B7355, #9F876B)',  // warm brown
+  'linear-gradient(135deg, #6B8E6B, #7FA27F)',  // sage green
+  'linear-gradient(135deg, #7B6BA5, #8F80B8)',  // lavender
+  'linear-gradient(135deg, #A0785A, #B38E70)',  // caramel
+];
+// Dark mode — Notion dark text colors as bar fills (slightly brighter for visibility)
+const catColorsDark = [
+  'linear-gradient(135deg, #528BD6, #6BA0E5)',  // notion blue
+  'linear-gradient(135deg, #5BA878, #70BD8D)',  // notion green
+  'linear-gradient(135deg, #D68A48, #E4A060)',  // notion orange
+  'linear-gradient(135deg, #9470C8, #A888DA)',  // notion purple
+  'linear-gradient(135deg, #C75D8A, #D8769F)',  // notion pink
+  'linear-gradient(135deg, #CDA048, #DBBF60)',  // notion yellow
+  'linear-gradient(135deg, #B08874, #C09E8C)',  // notion brown
+  'linear-gradient(135deg, #CC635C, #DC7B75)',  // notion red
+  'linear-gradient(135deg, #A8A8A8, #B8B8B8)',  // notion gray
+  'linear-gradient(135deg, #55B8AB, #6BCDBF)',  // teal
+  'linear-gradient(135deg, #749DCE, #88B0DC)',  // steel blue
+  'linear-gradient(135deg, #AA9577, #BCA98C)',  // warm brown
+  'linear-gradient(135deg, #6AB86A, #7ECC7E)',  // sage green
+  'linear-gradient(135deg, #9888D0, #AC9DE0)',  // lavender
+  'linear-gradient(135deg, #C49D7A, #D5B190)',  // caramel
 ];
 
 function getCategoryColor(catIdx) {
-  return catColors[catIdx % catColors.length];
+  const isDark = document.body.classList.contains('dark');
+  const colors = isDark ? catColorsDark : catColorsLight;
+  return colors[catIdx % colors.length];
 }
 
 // Render gantt chart
@@ -492,8 +547,17 @@ function render(filter) {
   categories.forEach((cat, catIdx) => {
     // Dividers
     const tags = cat.tags || [];
+    // Convert filter Set to check logic
+    const filters = filter instanceof Set ? filter : new Set([filter]);
+    const hasAll = filters.has('all');
+    const specialFilters = ['all', 'active', 'pending', 'done', 'p-urgent', 'p-high', 'p-medium', 'p-low'];
+    const tagFilters = [...filters].filter(f => !specialFilters.includes(f));
+    const statusFilters = [...filters].filter(f => ['active', 'pending', 'done'].includes(f));
+    const priorityMap = { 'p-urgent': 'urgent', 'p-high': 'high', 'p-medium': 'medium', 'p-low': 'low' };
+    const priorityFilters = [...filters].filter(f => priorityMap[f]).map(f => priorityMap[f]);
+
     if (tags.some(t => t.startsWith('divider'))) {
-      if (filter !== 'all' && filter !== 'active') return;
+      if (!hasAll && statusFilters.length === 0 && priorityFilters.length === 0) return;
       const divRow = document.createElement('tr');
       divRow.className = 'section-divider';
       const divTd = document.createElement('td');
@@ -503,27 +567,20 @@ function render(filter) {
       return;
     }
 
-    // Tag filter (dynamic — any non-priority, non-status filter is a tag)
-    const specialFilters = ['all', 'active', 'pending', 'done', 'p-urgent', 'p-high', 'p-medium', 'p-low'];
-    if (!specialFilters.includes(filter) && !tags.includes(filter)) return;
+    // Tag filter: if tag filters active, category must match at least one
+    if (tagFilters.length > 0 && !tagFilters.some(f => tags.includes(f))) return;
 
     let tasks = cat.tasks || [];
-    if (filter === 'active') {
-      tasks = tasks.filter(t => t.status === 'progress');
-      if (tasks.length === 0) return;
-    }
-    if (filter === 'pending') {
-      tasks = tasks.filter(t => t.status === 'pending');
-      if (tasks.length === 0) return;
-    }
-    if (filter === 'done') {
-      tasks = tasks.filter(t => t.status === 'done');
+    // Status filter
+    if (statusFilters.length > 0) {
+      const statusMap = { active: 'progress', pending: 'pending', done: 'done' };
+      const statuses = statusFilters.map(f => statusMap[f]);
+      tasks = tasks.filter(t => statuses.includes(t.status));
       if (tasks.length === 0) return;
     }
     // Priority filter
-    const priorityFilters = { 'p-urgent': 'urgent', 'p-high': 'high', 'p-medium': 'medium', 'p-low': 'low' };
-    if (priorityFilters[filter]) {
-      tasks = tasks.filter(t => t.priority === priorityFilters[filter]);
+    if (priorityFilters.length > 0) {
+      tasks = tasks.filter(t => priorityFilters.includes(t.priority));
       if (tasks.length === 0) return;
     }
 
@@ -534,7 +591,8 @@ function render(filter) {
     const catTd = document.createElement('td');
     catTd.colSpan = COLS + 2;
     const tagBadges = '';
-    catTd.innerHTML = `${cat.name}${tagBadges}<span class="cat-controls"><button class="cat-btn" title="Edit" data-cat-edit="${catIdx}">✏️</button><button class="cat-btn" title="Move Up" data-cat-up="${catIdx}">⬆️</button><button class="cat-btn" title="Move Down" data-cat-down="${catIdx}">⬇️</button></span>`;
+    catTd.innerHTML = `${cat.name}${tagBadges}<span class="cat-controls"><button class="cat-btn" title="Add Task" data-cat-add="${catIdx}">➕</button><button class="cat-btn" title="Edit" data-cat-edit="${catIdx}">✏️</button><button class="cat-btn" title="Move Up" data-cat-up="${catIdx}">⬆️</button><button class="cat-btn" title="Move Down" data-cat-down="${catIdx}">⬇️</button></span>`;
+    catTd.querySelector('[data-cat-add]').addEventListener('click', () => openAddTaskModal(catIdx));
     catTd.querySelector('[data-cat-edit]').addEventListener('click', () => openCatModal(catIdx));
     catTd.querySelector('[data-cat-up]').addEventListener('click', () => moveCategoryUp(catIdx));
     catTd.querySelector('[data-cat-down]').addEventListener('click', () => moveCategoryDown(catIdx));
@@ -609,6 +667,18 @@ function render(filter) {
         saveToLocalStorage();
         render(currentFilter);
       });
+      // Pin to Action Items button (only for non-Action Items tasks)
+      if (!isActionItems(catIdx)) {
+        const pinBtn = document.createElement('button');
+        pinBtn.className = 'pin-action-btn';
+        pinBtn.textContent = '📌';
+        pinBtn.title = currentLang === 'ko' ? 'Action Items에 추가' : 'Add to Action Items';
+        pinBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          moveTaskToActionItems(task, catIdx);
+        });
+        nameSpan.appendChild(pinBtn);
+      }
       nameTd.appendChild(nameSpan);
       nameTd.appendChild(prioTag);
       tr.appendChild(nameTd);
@@ -655,7 +725,7 @@ function render(filter) {
           } else {
             bar.style.background = getCategoryColor(catIdx);
           }
-          bar.style.height = '22px';
+          bar.style.height = '14px';
           bar.dataset.taskId = task.id;
 
           if (startCol === endCol) {
@@ -887,8 +957,61 @@ function closeRoutineModal() {
   document.getElementById('routineModal').classList.remove('active');
 }
 
+// Add new task
+let addingToCatIdx = null;
+
+function openAddTaskModal(catIdx) {
+  addingToCatIdx = catIdx;
+  editingTaskId = null;
+  editingCategoryIdx = null;
+  document.getElementById('editName').value = '';
+  document.getElementById('editStatus').value = 'pending';
+  document.getElementById('editPriority').value = 'medium';
+  // Default dates: this week
+  const today = new Date();
+  const nextWeek = new Date(today);
+  nextWeek.setDate(nextWeek.getDate() + 7);
+  document.getElementById('editStart').value = today.toISOString().split('T')[0];
+  document.getElementById('editEnd').value = nextWeek.toISOString().split('T')[0];
+  document.querySelector('#editModal .modal-title').textContent = currentLang === 'ko' ? '새 태스크 추가' : 'Add New Task';
+  document.getElementById('deleteBtn').style.display = 'none';
+  document.getElementById('editModal').classList.add('active');
+}
+
+function validateDates() {
+  const start = document.getElementById('editStart').value;
+  const end = document.getElementById('editEnd').value;
+  if (start && end && end < start) {
+    const msg = currentLang === 'ko' ? '종료일은 시작일 이후여야 합니다.' : 'End date must be after start date.';
+    alert(msg);
+    return false;
+  }
+  return true;
+}
+
+function saveNewTask() {
+  const name = document.getElementById('editName').value.trim();
+  if (!name || addingToCatIdx === null) return;
+  if (!validateDates()) return;
+  const newTask = {
+    id: 'task_' + Date.now(),
+    name,
+    status: document.getElementById('editStatus').value,
+    priority: document.getElementById('editPriority').value,
+    start: document.getElementById('editStart').value,
+    end: document.getElementById('editEnd').value,
+    cls: 'c-default'
+  };
+  allData.categories[addingToCatIdx].tasks.push(newTask);
+  addingToCatIdx = null;
+  saveToLocalStorage();
+  closeModal();
+  render(currentFilter);
+}
+
 // Edit modal
 function openEditModal(task, catIdx) {
+  addingToCatIdx = null;
   editingTaskId = task.id;
   editingCategoryIdx = catIdx;
   document.getElementById('editName').value = task.name;
@@ -896,6 +1019,8 @@ function openEditModal(task, catIdx) {
   document.getElementById('editPriority').value = task.priority;
   document.getElementById('editStart').value = task.start;
   document.getElementById('editEnd').value = task.end;
+  document.querySelector('#editModal .modal-title').textContent = currentLang === 'ko' ? '작업 수정' : 'Edit Task';
+  document.getElementById('deleteBtn').style.display = '';
   document.getElementById('editModal').classList.add('active');
 }
 
@@ -906,6 +1031,11 @@ function closeModal() {
 }
 
 function saveTask() {
+  if (addingToCatIdx !== null) {
+    saveNewTask();
+    return;
+  }
+  if (!validateDates()) return;
   const task = findTask(editingTaskId);
   if (!task) return;
   task.name = document.getElementById('editName').value;
@@ -1030,7 +1160,7 @@ function renameTagGlobally(oldTag, newTag) {
       cat.tags[idx] = newTag;
     }
   });
-  if (currentFilter === oldTag) currentFilter = newTag;
+  if (currentFilter.has(oldTag)) { currentFilter.delete(oldTag); currentFilter.add(newTag); }
   saveToLocalStorage();
   buildTagFilters();
   render(currentFilter);
@@ -1042,7 +1172,7 @@ function deleteTagGlobally(tag) {
     if (!cat.tags) return;
     cat.tags = cat.tags.filter(t => t !== tag);
   });
-  if (currentFilter === tag) currentFilter = 'all';
+  if (currentFilter.has(tag)) { currentFilter.delete(tag); if (currentFilter.size === 0) currentFilter.add('all'); }
   saveToLocalStorage();
   buildTagFilters();
   render(currentFilter);
@@ -1123,6 +1253,13 @@ function moveCategoryDown(catIdx) {
 function isActionItems(catIdx) {
   const cat = allData.categories[catIdx];
   return cat && cat.name && cat.name.includes('Action Items');
+}
+
+function moveTaskToActionItems(task, fromCatIdx) {
+  // Find Action Items category (first one with 'Action' in name)
+  const actionIdx = allData.categories.findIndex((c, i) => isActionItems(i));
+  if (actionIdx < 0 || actionIdx === fromCatIdx) return;
+  moveTaskToCategory(task.id, fromCatIdx, actionIdx);
 }
 
 function moveTaskToCategory(taskId, fromCatIdx, toCatIdx) {
@@ -1285,22 +1422,31 @@ function resetData() {
   }
 }
 
-// Filter buttons (toggle: click again to go back to all)
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const filter = btn.dataset.filter;
-    if (filter === 'all' || currentFilter !== filter) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = filter;
+// Multi-select filter logic
+function toggleFilter(tag) {
+  if (tag === 'all') {
+    currentFilter = new Set(['all']);
+  } else {
+    currentFilter.delete('all');
+    if (currentFilter.has(tag)) {
+      currentFilter.delete(tag);
+      if (currentFilter.size === 0) currentFilter.add('all');
     } else {
-      // Click same filter again → back to all
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
-      currentFilter = 'all';
+      currentFilter.add(tag);
     }
-    render(currentFilter);
+  }
+  syncFilterButtons();
+  render(currentFilter);
+}
+
+function syncFilterButtons() {
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', currentFilter.has(b.dataset.filter));
   });
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => toggleFilter(btn.dataset.filter));
 });
 
 // Action buttons
@@ -1334,6 +1480,20 @@ document.getElementById('langToggle').addEventListener('click', () => {
   localStorage.setItem('gantt-lang', currentLang);
   applyLang();
 });
+
+// Theme toggle
+function applyTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  document.getElementById('themeLight').classList.toggle('active', !dark);
+  document.getElementById('themeDark').classList.toggle('active', dark);
+  localStorage.setItem('gantt-theme', dark ? 'dark' : 'light');
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+  applyTheme(!document.body.classList.contains('dark'));
+  render(currentFilter);
+});
+// Restore saved theme
+if (localStorage.getItem('gantt-theme') === 'dark') applyTheme(true);
 
 // Initialize
 loadData();
