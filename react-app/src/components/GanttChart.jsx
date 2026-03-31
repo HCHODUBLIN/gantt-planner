@@ -203,6 +203,22 @@ export default function GanttChart() {
     return true; // Caller handles the actual move in updateData
   }, [allData]);
 
+  const unpinFromAction = useCallback((catIdx, taskIdx) => {
+    updateData(prev => {
+      const next = { ...prev, categories: prev.categories.map(c => ({ ...c, tasks: [...c.tasks.map(t => ({ ...t }))] })) };
+      const task = next.categories[catIdx].tasks[taskIdx];
+      if (!task._originCat) return next;
+      const originIdx = next.categories.findIndex(c => c.name === task._originCat);
+      if (originIdx >= 0 && originIdx !== catIdx) {
+        const [removed] = next.categories[catIdx].tasks.splice(taskIdx, 1);
+        delete removed._originCat;
+        delete removed._originCatIdx;
+        next.categories[originIdx].tasks.push(removed);
+      }
+      return next;
+    });
+  }, [updateData]);
+
   const cyclePriority = useCallback((catIdx, taskIdx) => {
     updateData(prev => {
       const next = { ...prev, categories: prev.categories.map(c => ({ ...c, tasks: [...c.tasks.map(t => ({ ...t }))] })) };
@@ -450,6 +466,7 @@ export default function GanttChart() {
                   onCyclePriority={cyclePriority}
                   onCycleStatus={cycleStatus}
                   onPinToAction={moveTaskToActionItems}
+                  onUnpinFromAction={unpinFromAction}
                   startDrag={startDrag}
                   t={t}
                 />
@@ -491,7 +508,7 @@ function CategoryBlock({
   cat, catIdx, tasks, isDark, lang, todayCol,
   isActionItems, onCategoryDrop, onTaskDrop, onTaskDragStart,
   onAddTask, onEditCategory, onMoveCategoryUp, onMoveCategoryDown,
-  onEditTask, onCyclePriority, onCycleStatus, onPinToAction,
+  onEditTask, onCyclePriority, onCycleStatus, onPinToAction, onUnpinFromAction,
   startDrag, t
 }) {
   const catIsAction = isActionItems(catIdx);
@@ -559,6 +576,15 @@ function CategoryBlock({
                   onClick={e => { e.stopPropagation(); onPinToAction(task, catIdx); }}
                 >
                   📌
+                </button>
+              )}
+              {catIsAction && task._originCat && (
+                <button
+                  className="pin-action-btn"
+                  title={lang === 'ko' ? '원래 카테고리로 되돌리기' : 'Return to original category'}
+                  onClick={e => { e.stopPropagation(); onUnpinFromAction(catIdx, taskIdx); }}
+                >
+                  ↩️
                 </button>
               )}
             </td>

@@ -4,7 +4,7 @@ import { useData } from '../contexts/DataContext';
 import { useI18n } from '../contexts/I18nContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { formatDateKey, getWeekStart } from '../utils/dates';
-import { loadWeeklyPlan, saveWeeklyPlan as persistWeeklyPlan, saveToServer as saveToServerApi } from '../utils/storage';
+import { loadWeeklyPlan, saveWeeklyPlan as persistWeeklyPlan, getWeekKey, saveToServer as saveToServerApi } from '../utils/storage';
 import { taskClsColors } from '../utils/colors';
 import ActionItemsPanel from './ActionItemsPanel';
 import ToggleGroup from './ToggleGroup';
@@ -12,7 +12,7 @@ import ToggleGroup from './ToggleGroup';
 const PRIORITY_CLASSES = { urgent: 'priority-urgent', high: 'priority-high', medium: 'priority-medium', low: 'priority-low' };
 
 export default function WeeklyPlanner() {
-  const { allData } = useData();
+  const { allData, updateData } = useData();
   const { t, lang } = useI18n();
   const { isDark } = useTheme();
 
@@ -50,13 +50,22 @@ export default function WeeklyPlanner() {
 
   // Load weekly plan when week changes
   useEffect(() => {
-    setWeeklyPlan(loadWeeklyPlan(currentWeekStart));
-  }, [currentWeekStart]);
+    if (!allData) return;
+    const weekKey = getWeekKey(currentWeekStart);
+    const stored = allData.weeklyPlans?.[weekKey] || loadWeeklyPlan(currentWeekStart);
+    setWeeklyPlan(stored);
+  }, [currentWeekStart, allData]);
 
   const saveWP = useCallback((plan) => {
     setWeeklyPlan(plan);
     persistWeeklyPlan(currentWeekStart, plan);
-  }, [currentWeekStart]);
+    // Also save to allData so it persists with tasks.json
+    const weekKey = getWeekKey(currentWeekStart);
+    updateData(prev => ({
+      ...prev,
+      weeklyPlans: { ...(prev.weeklyPlans || {}), [weekKey]: plan }
+    }));
+  }, [currentWeekStart, updateData]);
 
   const getTasksForSlot = useCallback((dayKey, period) => {
     if (!weeklyPlan[dayKey]) return [];
