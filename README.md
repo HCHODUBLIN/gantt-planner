@@ -1,40 +1,61 @@
-# Hyunji — Master Gantt Chart & Weekly Planner
+# Gantt Planner
 
-Interactive project management dashboard for tracking WP2, CDE, tech projects, personal development, and interview prep.
-
-## Features
-
-- **Gantt Chart** (`index.html`): Full timeline view Mar–Sep 2026 with inline editing
-- **Weekly Planner** (`weekly.html`): Auto-generated weekly schedule based on task priorities and daily routine
-- **Data** (`tasks.json`): Single source of truth for all tasks, editable and exportable
+Interactive project management dashboard with Gantt chart and weekly planner. Built with React + Vite, deployed on GitHub Pages with PIN-based encryption for private data.
 
 ## Live Site
 
-Visit the GitHub Pages site to use the interactive dashboard.
+https://hchodublin.github.io/gantt-planner/
 
-## Quick Start
+- Default view shows demo data
+- Enter PIN to unlock private data
 
-1. Open `index.html` for the Gantt chart view
-2. Click any task to edit name, status, priority, or dates
-3. Use `weekly.html` for detailed weekly planning with morning/afternoon/evening blocks
-4. Export changes as JSON anytime
+## Features
 
-## Task Categories
+### Gantt Chart
+- Dynamic timeline (4 weeks back + 6 months ahead, auto-scrolls to current week)
+- Drag-and-drop bar resizing (start/end) and repositioning
+- Click-to-cycle status (Pending / In Progress / Done) and priority (Low / Med / High / Urgent)
+- Multi-select filtering by status, priority, and custom tags
+- Category management (add / edit / delete / reorder)
+- Action Items focus board with origin tracking and auto-return on done
+- Editable daily routine section
 
-| Section | Description |
-|---|---|
-| WP2 | Work Package 2 — Food Sharing Map, Papers, Communication, Foodcloud |
-| CDE | Communication, Dissemination & Exploitation plan |
-| Tech Projects | SHAREWEAVE, CULTIVATE, DIVAIRCITY, MINIMAP |
-| Personal Dev | DE Zoomcamp, Azure Certs, Courses, Career, Lifestyle |
-| Interview | Active interview preparations |
+### Weekly Planner
+- 7-day grid with configurable time blocks (morning / afternoon / evening)
+- Drag-and-drop tasks from Action Items panel into time blocks
+- Day notes and markdown export
+- Weekly plans persist alongside task data
 
-## Daily Routine Pattern
+### Shared
+- Dark / Light mode (Notion-inspired color scheme)
+- EN / KO language toggle
+- Auto-save to localStorage + manual save to server
+- PIN-based AES-GCM encryption for private data on public hosting
 
-| Time | Activity |
-|---|---|
-| Morning | Deep work — planning, code review |
-| Afternoon | Meetings, AI prompting, restructuring, study |
-| Evening | Exercise before dinner (5pm), break or 1hr Leetcode |
+## Tech Stack
 
-**Rules:** One project/week for deep work. One training until done. Saturday = rest. Sunday = study & planning.
+- **Frontend:** React 19, React Router, Vite
+- **Styling:** CSS variables with Notion color palette
+- **Encryption:** Web Crypto API (PBKDF2 + AES-GCM)
+- **Deployment:** GitHub Actions + GitHub Pages
+
+## Development
+
+```bash
+cd react-app
+npm install
+npm run dev
+```
+
+## Encrypt Private Data
+
+```bash
+cd react-app
+node encrypt.js <your-pin>
+```
+
+This generates `public/tasks.encrypted.json` which is safe to commit.
+
+## Deploy
+
+Push to `react-refactor` branch — GitHub Actions auto-deploys to Pages.

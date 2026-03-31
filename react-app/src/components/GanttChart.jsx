@@ -4,7 +4,7 @@ import { useData } from '../contexts/DataContext';
 import { useI18n } from '../contexts/I18nContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getCategoryColor } from '../utils/colors';
-import { dateToCol, colToDate, COLS, buildMonthWeekHeaders } from '../utils/dates';
+import { dateToCol, colToDate, COLS, TODAY_COL, buildMonthWeekHeaders } from '../utils/dates';
 import { saveToServer as saveToServerApi } from '../utils/storage';
 import FilterBar from './FilterBar';
 import TaskModal from './TaskModal';
@@ -383,12 +383,18 @@ export default function GanttChart() {
     : saveStatus === 'saving' ? '⏳...'
     : t('saveBtn');
 
-  // Compute today column
-  const todayCol = (() => {
-    const today = new Date();
-    const diff = Math.round((today - new Date(2026, 2, 23)) / (7 * 24 * 60 * 60 * 1000));
-    return Math.max(0, Math.min(COLS - 1, diff));
-  })();
+  const todayCol = TODAY_COL;
+  const tableRef = useRef(null);
+
+  // Auto-scroll to current week on mount
+  useEffect(() => {
+    if (tableRef.current) {
+      const todayCell = tableRef.current.querySelector(`.today-col`);
+      if (todayCell) {
+        todayCell.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+      }
+    }
+  }, [allData]);
 
   return (
     <div style={{ padding: '24px' }}>
@@ -396,7 +402,7 @@ export default function GanttChart() {
 
       <h1>{t('title')}</h1>
       <p className="subtitle">
-        {t('subtitle')} | Updated: {allData.updated || ''} | Week columns start from Mar 23
+        {t('subtitle')} | Updated: {allData.updated || ''}
       </p>
 
       <div className="filter-bar">
@@ -415,7 +421,7 @@ export default function GanttChart() {
       </div>
 
       <div className="gantt-container">
-        <table id="gantt">
+        <table id="gantt" ref={tableRef}>
           <thead>
             <tr>
               <th>{t('thTask')}</th>
