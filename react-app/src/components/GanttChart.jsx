@@ -375,6 +375,29 @@ export default function GanttChart() {
     }).filter(Boolean);
   }, [allData, currentFilter]);
 
+  const todayCol = TODAY_COL;
+  const tableRef = useRef(null);
+
+  // Auto-scroll to current week on mount
+  const containerRef = useRef(null);
+  const hasScrolled = useRef(false);
+  useEffect(() => {
+    if (!allData || hasScrolled.current) return;
+    const timer = setTimeout(() => {
+      const container = containerRef.current;
+      if (!container) return;
+      const todayCells = container.querySelectorAll('.today-col');
+      if (todayCells.length > 0) {
+        const cell = todayCells[0];
+        const rect = cell.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        container.scrollLeft += rect.left - containerRect.left - 250;
+        hasScrolled.current = true;
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [allData]);
+
   if (!allData) return <div style={{ padding: '24px' }}>Loading...</div>;
 
   const filteredData = getFilteredData();
@@ -382,19 +405,6 @@ export default function GanttChart() {
   const saveLabel = saveStatus === 'saved' ? (lang === 'ko' ? '✅ 저장 완료!' : '✅ Saved!')
     : saveStatus === 'saving' ? '⏳...'
     : t('saveBtn');
-
-  const todayCol = TODAY_COL;
-  const tableRef = useRef(null);
-
-  // Auto-scroll to current week on mount
-  useEffect(() => {
-    if (tableRef.current) {
-      const todayCell = tableRef.current.querySelector(`.today-col`);
-      if (todayCell) {
-        todayCell.scrollIntoView({ inline: 'center', behavior: 'smooth' });
-      }
-    }
-  }, [allData]);
 
   return (
     <div style={{ padding: '24px' }}>
@@ -420,7 +430,7 @@ export default function GanttChart() {
         <button className="action-btn reset" onClick={handleReset}>{t('resetBtn')}</button>
       </div>
 
-      <div className="gantt-container">
+      <div className="gantt-container" ref={containerRef}>
         <table id="gantt" ref={tableRef}>
           <thead>
             <tr>
