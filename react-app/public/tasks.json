@@ -1,0 +1,800 @@
+{
+  "updated": "2026-03-23",
+  "categories": [
+    {
+      "name": "🔴 Action Items (This Week)",
+      "tags": [
+        "company-work"
+      ],
+      "tasks": [
+        {
+          "id": "tcd2",
+          "name": "Lecture prep",
+          "start": "2026-03-23",
+          "end": "2026-03-23",
+          "cls": "c-misc",
+          "priority": "medium",
+          "status": "progress",
+          "tip": "강의"
+        },
+        {
+          "id": "cv4",
+          "name": "Dashboard",
+          "start": "2026-03-23",
+          "end": "2026-03-23",
+          "cls": "c-proj",
+          "priority": "medium",
+          "status": "progress",
+          "tip": "대시보드",
+          "_originCat": "☁️ CULTIVATE",
+          "_originCatIdx": 2
+        },
+        {
+          "id": "task_1774473237921",
+          "name": "Yoga",
+          "status": "progress",
+          "priority": "medium",
+          "start": "2026-03-25",
+          "end": "2026-04-01",
+          "cls": "c-default",
+          "_originCat": "Exercise",
+          "_originCatIdx": 10
+        },
+        {
+          "id": "fp1",
+          "name": "FutureCode Python",
+          "start": "2026-03-23",
+          "end": "2026-04-19",
+          "cls": "c-course",
+          "priority": "high",
+          "status": "progress",
+          "tip": "Python",
+          "_originCat": "📚 Courses & Study",
+          "_originCatIdx": 8
+        },
+        {
+          "id": "lc1",
+          "name": "Leetcode SQL",
+          "start": "2026-03-23",
+          "end": "2026-06-14",
+          "cls": "c-leetcode",
+          "priority": "high",
+          "status": "progress",
+          "tip": "저녁만",
+          "_originCat": "📚 Courses & Study",
+          "_originCatIdx": 8
+        },
+        {
+          "id": "tcd3",
+          "name": "GeoForum Review",
+          "start": "2026-03-23",
+          "end": "2026-03-23",
+          "cls": "c-misc",
+          "priority": "medium",
+          "status": "done",
+          "tip": "리뷰"
+        },
+        {
+          "id": "act4",
+          "name": "OpenAI API Pcard 승인",
+          "start": "2026-03-23",
+          "end": "2026-04-11",
+          "cls": "c-action",
+          "priority": "high",
+          "status": "done",
+          "tip": "API Pcard"
+        },
+        {
+          "id": "pap1",
+          "name": "MethodsX paper",
+          "start": "2026-03-23",
+          "end": "2026-04-30",
+          "cls": "c-paper",
+          "priority": "high",
+          "status": "progress",
+          "tip": "MethodsX 제출",
+          "_originCat": "📝 Papers & Conferences",
+          "_originCatIdx": 1
+        },
+        {
+          "id": "task_1774474308787",
+          "name": "Expedition!",
+          "status": "progress",
+          "priority": "medium",
+          "start": "2026-03-25",
+          "end": "2026-04-01",
+          "cls": "c-default",
+          "_originCat": "Me time!",
+          "_originCatIdx": 11
+        },
+        {
+          "id": "pap3",
+          "name": "ASONAM (w/ AP)",
+          "start": "2026-04-13",
+          "end": "2026-06-22",
+          "cls": "c-paper",
+          "priority": "medium",
+          "status": "progress",
+          "tip": "SNA+Geo",
+          "_originCat": "📝 Papers & Conferences",
+          "_originCatIdx": 1
+        },
+        {
+          "id": "iv3",
+          "name": "EY Data",
+          "start": "2026-03-23",
+          "end": "2026-03-29",
+          "cls": "c-interview",
+          "priority": "high",
+          "status": "progress",
+          "tip": "EY Data",
+          "_originCat": "🎯 Interview Prep",
+          "_originCatIdx": 9
+        },
+        {
+          "id": "mm1",
+          "name": "MINIMAP Design",
+          "start": "2026-05-04",
+          "end": "2026-06-08",
+          "cls": "c-proj",
+          "priority": "low",
+          "status": "pending",
+          "tip": "디자인",
+          "_originCat": "🌍 DIVAIRCITY & MINIMAP",
+          "_originCatIdx": 5
+        },
+        {
+          "id": "task_1774957632129",
+          "name": "Pilates",
+          "status": "progress",
+          "priority": "medium",
+          "start": "2026-03-31",
+          "end": "2026-04-07",
+          "cls": "c-default",
+          "_originCat": "Exercise",
+          "_originCatIdx": 10
+        }
+      ]
+    },
+    {
+      "name": "📝 Papers & Conferences",
+      "tags": [
+        "company-work"
+      ],
+      "tasks": [
+        {
+          "id": "pap2",
+          "name": "IGU Conference",
+          "start": "2026-08-16",
+          "end": "2026-08-30",
+          "cls": "c-paper",
+          "priority": "medium",
+          "status": "progress",
+          "tip": "105 city"
+        },
+        {
+          "id": "pap4",
+          "name": "Routledge Handbook",
+          "start": "2026-04-27",
+          "end": "2026-08-17",
+          "cls": "c-paper",
+          "priority": "low",
+          "status": "pending",
+          "tip": "Due Aug 1"
+        },
+        {
+          "id": "tcd1",
+          "name": "Project Review prep",
+          "start": "2026-03-23",
+          "end": "2026-09-28",
+          "cls": "c-misc",
+          "priority": "medium",
+          "status": "done",
+          "tip": "미팅 준비"
+        },
+        {
+          "id": "com2",
+          "name": "Tracking (ongoing)",
+          "start": "2026-04-20",
+          "end": "2026-09-28",
+          "cls": "c-comm",
+          "priority": "low",
+          "status": "done",
+          "tip": "지속"
+        },
+        {
+          "id": "task_1774474256765",
+          "name": "Expedition!!",
+          "status": "progress",
+          "priority": "medium",
+          "start": "2026-03-25",
+          "end": "2026-04-01",
+          "cls": "c-default"
+        },
+        {
+          "id": "task_1774473071757",
+          "name": "D8 proposal",
+          "status": "done",
+          "priority": "urgent",
+          "start": "2026-03-25",
+          "end": "2026-04-02",
+          "cls": "c-default"
+        }
+      ]
+    },
+    {
+      "name": "☁️ CULTIVATE",
+      "tags": [
+        "company-work",
+        "data-engineering"
+      ],
+      "tasks": [
+        {
+          "id": "act1",
+          "name": "SHARECITY 100 데이터 클리닝 & OpenAI 분류",
+          "start": "2026-03-23",
+          "end": "2026-04-19",
+          "cls": "c-action",
+          "priority": "urgent",
+          "status": "progress",
+          "tip": "이번 주 완료 목표"
+        },
+        {
+          "id": "act3",
+          "name": "Pcard 정리 & Costing document",
+          "start": "2026-03-23",
+          "end": "2026-04-04",
+          "cls": "c-action",
+          "priority": "urgent",
+          "status": "progress",
+          "tip": "행정 처리"
+        },
+        {
+          "id": "map1",
+          "name": "SHARECITY 100 데이터 통합",
+          "start": "2026-03-23",
+          "end": "2026-04-18",
+          "cls": "c-map",
+          "priority": "high",
+          "status": "progress",
+          "tip": "클리닝→통합"
+        },
+        {
+          "id": "map4",
+          "name": "Team Test 2nd Round",
+          "start": "2026-05-11",
+          "end": "2026-06-29",
+          "cls": "c-map",
+          "priority": "medium",
+          "status": "pending",
+          "tip": "5~6월"
+        },
+        {
+          "id": "cv1",
+          "name": "Snowflake reload & schema",
+          "start": "2026-03-23",
+          "end": "2026-04-20",
+          "cls": "c-proj",
+          "priority": "urgent",
+          "status": "done",
+          "tip": "다음주 우선! role,vars,DB,dbt"
+        },
+        {
+          "id": "cv2",
+          "name": "AWS migration",
+          "start": "2026-03-30",
+          "end": "2026-04-27",
+          "cls": "c-proj",
+          "priority": "high",
+          "status": "done",
+          "tip": "클라우드"
+        },
+        {
+          "id": "cv3",
+          "name": "Terraform restructure",
+          "start": "2026-03-30",
+          "end": "2026-04-20",
+          "cls": "c-proj",
+          "priority": "high",
+          "status": "done",
+          "tip": "Udemy+노트북"
+        },
+        {
+          "id": "act2",
+          "name": "Review meeting slides update",
+          "start": "2026-03-23",
+          "end": "2026-04-12",
+          "cls": "c-action",
+          "priority": "urgent",
+          "status": "pending",
+          "tip": "미팅 자료"
+        }
+      ]
+    },
+    {
+      "name": "📣 CDE — Dissemination",
+      "tags": [
+        "cde"
+      ],
+      "tasks": [
+        {
+          "id": "dis1",
+          "name": "Email campaign (D3)",
+          "start": "2026-04-06",
+          "end": "2026-05-25",
+          "cls": "c-diss",
+          "priority": "high",
+          "status": "progress",
+          "tip": "HC&JL"
+        },
+        {
+          "id": "dis2",
+          "name": "MUFPP Newsletter (D4)",
+          "start": "2026-03-23",
+          "end": "2026-04-20",
+          "cls": "c-diss",
+          "priority": "medium",
+          "status": "done",
+          "tip": "Mar&Apr"
+        },
+        {
+          "id": "dis3",
+          "name": "LinkedIn (D5)",
+          "start": "2026-03-23",
+          "end": "2026-08-03",
+          "cls": "c-diss",
+          "priority": "low",
+          "status": "done",
+          "tip": "지속"
+        },
+        {
+          "id": "dis4",
+          "name": "IGS/RGS/P&G (D6)",
+          "start": "2026-04-20",
+          "end": "2026-08-03",
+          "cls": "c-diss",
+          "priority": "medium",
+          "status": "done",
+          "tip": "복수발표"
+        }
+      ]
+    },
+    {
+      "name": "🔧 SHAREWEAVE",
+      "tags": [
+        "company-work",
+        "data-engineering"
+      ],
+      "tasks": [
+        {
+          "id": "sw1",
+          "name": "SIA framework",
+          "start": "2026-03-23",
+          "end": "2026-04-06",
+          "cls": "c-proj",
+          "priority": "urgent",
+          "status": "pending",
+          "tip": "다음주 우선!"
+        },
+        {
+          "id": "fc1",
+          "name": "GRI/CSRD 리뷰",
+          "start": "2026-03-30",
+          "end": "2026-05-11",
+          "cls": "c-food",
+          "priority": "medium",
+          "status": "progress",
+          "tip": "SIA & GRI"
+        },
+        {
+          "id": "sw2",
+          "name": "Pipeline & Airflow",
+          "start": "2026-03-30",
+          "end": "2026-04-20",
+          "cls": "c-proj",
+          "priority": "high",
+          "status": "pending",
+          "tip": "Data gathering"
+        },
+        {
+          "id": "sw3",
+          "name": "Analysis",
+          "start": "2026-04-20",
+          "end": "2026-05-11",
+          "cls": "c-proj",
+          "priority": "medium",
+          "status": "pending",
+          "tip": "분석"
+        },
+        {
+          "id": "fc4",
+          "name": "Showcase & Workshop",
+          "start": "2026-08-10",
+          "end": "2026-09-28",
+          "cls": "c-food",
+          "priority": "low",
+          "status": "pending",
+          "tip": "9월"
+        },
+        {
+          "id": "sw4",
+          "name": "AI code review",
+          "start": "2026-05-11",
+          "end": "2026-05-25",
+          "cls": "c-proj",
+          "priority": "medium",
+          "status": "pending",
+          "tip": "AI리뷰"
+        },
+        {
+          "id": "fc3",
+          "name": "데이터 분석 300+",
+          "start": "2026-05-11",
+          "end": "2026-08-03",
+          "cls": "c-food",
+          "priority": "low",
+          "status": "progress",
+          "tip": "NI 포함"
+        },
+        {
+          "id": "fc2",
+          "name": "AWS & PO",
+          "start": "2026-04-06",
+          "end": "2026-05-04",
+          "cls": "c-food",
+          "priority": "medium",
+          "status": "done",
+          "tip": "인프라"
+        }
+      ]
+    },
+    {
+      "name": "🌍 DIVAIRCITY & MINIMAP",
+      "tags": [
+        "company-work",
+        "data-engineering"
+      ],
+      "tasks": [
+        {
+          "id": "dv1",
+          "name": "DivAirCity Kafka test",
+          "start": "2026-04-20",
+          "end": "2026-05-11",
+          "cls": "c-proj",
+          "priority": "medium",
+          "status": "pending",
+          "tip": "Kafka"
+        }
+      ]
+    },
+    {
+      "name": "🛠️ DE Zoomcamp",
+      "tags": [
+        "data-engineering",
+        "personal"
+      ],
+      "tasks": [
+        {
+          "id": "hw1",
+          "name": "HW1: Docker/SQL/Terraform",
+          "start": "2026-03-23",
+          "end": "2026-03-29",
+          "cls": "c-zoomcamp",
+          "priority": "urgent",
+          "status": "progress",
+          "tip": "3/29"
+        },
+        {
+          "id": "pa1",
+          "name": "⚠️ Project Attempt 1",
+          "start": "2026-03-31",
+          "end": "2026-03-31",
+          "cls": "c-action",
+          "priority": "urgent",
+          "status": "progress",
+          "tip": "마감 3/31!"
+        },
+        {
+          "id": "hw2",
+          "name": "HW2: Workflow Orchestration",
+          "start": "2026-03-30",
+          "end": "2026-04-05",
+          "cls": "c-zoomcamp",
+          "priority": "high",
+          "status": "pending",
+          "tip": "4/5"
+        },
+        {
+          "id": "hw3",
+          "name": "HW3: Data Warehousing",
+          "start": "2026-04-06",
+          "end": "2026-04-12",
+          "cls": "c-zoomcamp",
+          "priority": "high",
+          "status": "pending",
+          "tip": "4/12"
+        },
+        {
+          "id": "hw4",
+          "name": "HW4: Analytics Engineering",
+          "start": "2026-04-13",
+          "end": "2026-04-19",
+          "cls": "c-zoomcamp",
+          "priority": "high",
+          "status": "pending",
+          "tip": "4/19"
+        },
+        {
+          "id": "pa2",
+          "name": "⚠️ Project Attempt 2",
+          "start": "2026-04-21",
+          "end": "2026-04-21",
+          "cls": "c-action",
+          "priority": "urgent",
+          "status": "pending",
+          "tip": "마감 4/21!"
+        },
+        {
+          "id": "hw5",
+          "name": "HW5-7 + Workshop + Final",
+          "start": "2026-04-20",
+          "end": "2026-06-08",
+          "cls": "c-zoomcamp",
+          "priority": "medium",
+          "status": "pending",
+          "tip": "Bruin~Project"
+        }
+      ]
+    },
+    {
+      "name": "🏆 Certs",
+      "tasks": [
+        {
+          "id": "az1",
+          "name": "AZ-900 Fundamentals",
+          "start": "2026-03-23",
+          "end": "2026-03-27",
+          "cls": "c-cert",
+          "priority": "low",
+          "status": "done",
+          "tip": "Done!"
+        },
+        {
+          "id": "az6",
+          "name": "Snowflake Certificate",
+          "start": "2026-05-25",
+          "end": "2026-06-22",
+          "cls": "c-cert",
+          "priority": "medium",
+          "status": "pending",
+          "tip": "Snowflake"
+        },
+        {
+          "id": "ou1",
+          "name": "ATU computing",
+          "start": "2026-09-01",
+          "end": "2026-09-28",
+          "cls": "c-course",
+          "priority": "high",
+          "status": "pending",
+          "tip": "2yr"
+        }
+      ],
+      "tags": [
+        "personal",
+        "job-seeking"
+      ]
+    },
+    {
+      "name": "📚 Courses & Study",
+      "tags": [
+        "personal"
+      ],
+      "tasks": [
+        {
+          "id": "sn1",
+          "name": "Snowflake Training",
+          "start": "2026-03-23",
+          "end": "2026-04-20",
+          "cls": "c-course",
+          "priority": "high",
+          "status": "progress",
+          "tip": "다음주!"
+        },
+        {
+          "id": "dbt1",
+          "name": "dbt Fundamentals",
+          "start": "2026-04-20",
+          "end": "2026-05-11",
+          "cls": "c-course",
+          "priority": "medium",
+          "status": "pending",
+          "tip": "dbt"
+        },
+        {
+          "id": "cs1",
+          "name": "CS50 Harvard",
+          "start": "2026-03-23",
+          "end": "2026-04-13",
+          "cls": "c-course",
+          "priority": "low",
+          "status": "progress",
+          "tip": "10wk 마무리"
+        },
+        {
+          "id": "cs2",
+          "name": "CS61A Berkeley",
+          "start": "2026-04-20",
+          "end": "2026-05-25",
+          "cls": "c-course",
+          "priority": "low",
+          "status": "pending",
+          "tip": "Python"
+        },
+        {
+          "id": "cs3",
+          "name": "CS61B Berkeley",
+          "start": "2026-05-24",
+          "end": "2026-06-28",
+          "cls": "c-course",
+          "priority": "low",
+          "status": "pending",
+          "tip": "DS"
+        },
+        {
+          "id": "task_1774473589975",
+          "name": "ATU",
+          "status": "pending",
+          "priority": "medium",
+          "start": "2026-09-01",
+          "end": "2027-09-01",
+          "cls": "c-default"
+        },
+        {
+          "id": "task_1774625113601",
+          "name": "Springboard application",
+          "status": "done",
+          "priority": "urgent",
+          "start": "2026-03-27",
+          "end": "2026-03-27",
+          "cls": "c-default"
+        }
+      ]
+    },
+    {
+      "name": "🎯 Interview Prep",
+      "tags": [
+        "job-seeking"
+      ],
+      "tasks": [
+        {
+          "id": "iv1",
+          "name": "ResMed",
+          "start": "2026-03-23",
+          "end": "2026-03-23",
+          "cls": "c-interview",
+          "priority": "urgent",
+          "status": "done",
+          "tip": "ResMed"
+        },
+        {
+          "id": "iv2",
+          "name": "EY",
+          "start": "2026-03-23",
+          "end": "2026-03-23",
+          "cls": "c-interview",
+          "priority": "high",
+          "status": "done",
+          "tip": "EY general"
+        },
+        {
+          "id": "iv4",
+          "name": "Irish Life",
+          "start": "2026-03-23",
+          "end": "2026-03-23",
+          "cls": "c-interview",
+          "priority": "high",
+          "status": "done",
+          "tip": "Irish Life"
+        },
+        {
+          "id": "iv5",
+          "name": "Emagine JD",
+          "start": "2026-03-23",
+          "end": "2026-03-23",
+          "cls": "c-interview",
+          "priority": "medium",
+          "status": "done",
+          "tip": "JD분석"
+        }
+      ]
+    },
+    {
+      "name": "Exercise",
+      "tags": [
+        "personal"
+      ],
+      "tasks": [
+        {
+          "id": "task_1774473214078",
+          "name": "Swimming",
+          "status": "progress",
+          "priority": "medium",
+          "start": "2026-03-25",
+          "end": "2026-04-01",
+          "cls": "c-default"
+        },
+        {
+          "id": "task_1774473223656",
+          "name": "Running",
+          "status": "progress",
+          "priority": "medium",
+          "start": "2026-03-25",
+          "end": "2026-04-01",
+          "cls": "c-default"
+        },
+        {
+          "id": "task_1774473230301",
+          "name": "Gym",
+          "status": "progress",
+          "priority": "medium",
+          "start": "2026-03-25",
+          "end": "2026-04-01",
+          "cls": "c-default"
+        }
+      ]
+    },
+    {
+      "name": "Me time!",
+      "tags": [
+        "personal"
+      ],
+      "tasks": []
+    }
+  ],
+  "routine": {
+    "blocks": [
+      {
+        "key": "아침",
+        "emoji": "🌅",
+        "label": "아침",
+        "labelEn": "Morning",
+        "hours": "09-12",
+        "desc": "Deep work — planning, code review"
+      },
+      {
+        "key": "오후",
+        "emoji": "☀️",
+        "label": "오후",
+        "labelEn": "Afternoon",
+        "hours": "13-16",
+        "desc": "Meetings, AI prompting, restructuring, study"
+      },
+      {
+        "key": "저녁",
+        "emoji": "🌙",
+        "label": "저녁",
+        "labelEn": "Evening",
+        "hours": "17-18",
+        "desc": "Exercise before dinner (5pm), break or 1hr Leetcode"
+      },
+      {
+        "key": "밤",
+        "emoji": "⏰",
+        "label": "밤",
+        "labelEn": "night",
+        "hours": "20-22",
+        "desc": ""
+      }
+    ],
+    "saturday": "Full rest",
+    "sunday": "Deep study & next week planning",
+    "rules": "One project/week for deep work. One training until done.",
+    "exercise": "anything 2-3x/week"
+  },
+  "nextWeekPriority": [
+    "SHAREWEAVE",
+    "Snowflake",
+    "Leetcode (evening only)"
+  ]
+}

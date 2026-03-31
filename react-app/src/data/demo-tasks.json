@@ -1,0 +1,116 @@
+{
+  "updated": "2026-03-23",
+  "categories": [
+    {
+      "name": "🔴 Action Items (This Week)",
+      "tags": ["work"],
+      "tasks": [
+        {
+          "id": "demo1",
+          "name": "Review project proposal",
+          "start": "2026-03-23",
+          "end": "2026-03-27",
+          "cls": "c-action",
+          "priority": "high",
+          "status": "progress",
+          "tip": "Review"
+        },
+        {
+          "id": "demo2",
+          "name": "Team standup slides",
+          "start": "2026-03-23",
+          "end": "2026-03-25",
+          "cls": "c-misc",
+          "priority": "medium",
+          "status": "done",
+          "tip": "Slides"
+        }
+      ]
+    },
+    {
+      "name": "📊 Projects",
+      "tags": ["work"],
+      "tasks": [
+        {
+          "id": "demo3",
+          "name": "Dashboard redesign",
+          "start": "2026-03-23",
+          "end": "2026-04-20",
+          "cls": "c-proj",
+          "priority": "urgent",
+          "status": "progress",
+          "tip": "Dashboard v2"
+        },
+        {
+          "id": "demo4",
+          "name": "API migration",
+          "start": "2026-04-06",
+          "end": "2026-05-04",
+          "cls": "c-proj",
+          "priority": "high",
+          "status": "pending",
+          "tip": "REST to GraphQL"
+        }
+      ]
+    },
+    {
+      "name": "📚 Learning",
+      "tags": ["personal"],
+      "tasks": [
+        {
+          "id": "demo5",
+          "name": "React advanced patterns",
+          "start": "2026-03-23",
+          "end": "2026-04-13",
+          "cls": "c-course",
+          "priority": "medium",
+          "status": "progress",
+          "tip": "Udemy course"
+        },
+        {
+          "id": "demo6",
+          "name": "TypeScript certification",
+          "start": "2026-04-20",
+          "end": "2026-05-11",
+          "cls": "c-cert",
+          "priority": "low",
+          "status": "pending",
+          "tip": "Cert prep"
+        }
+      ]
+    }
+  ],
+  "routine": {
+    "blocks": [
+      {
+        "key": "morning",
+        "emoji": "🌅",
+        "label": "아침",
+        "labelEn": "Morning",
+        "hours": "09-12",
+        "desc": "Deep work - planning, code review"
+      },
+      {
+        "key": "afternoon",
+        "emoji": "☀️",
+        "label": "오후",
+        "labelEn": "Afternoon",
+        "hours": "13-17",
+        "desc": "Meetings, collaboration, study"
+      },
+      {
+        "key": "evening",
+        "emoji": "🌙",
+        "label": "저녁",
+        "labelEn": "Evening",
+        "hours": "18-19",
+        "desc": "Exercise or light reading"
+      }
+    ],
+    "saturday": "Full rest",
+    "sunday": "Deep study & next week planning",
+    "rules": "One project/week for deep work.",
+    "exercise": "Exercise 2-3x/week"
+  },
+  "nextWeekPriority": ["Dashboard redesign", "React course"]
+}
