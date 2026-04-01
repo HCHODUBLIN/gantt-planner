@@ -72,3 +72,63 @@ export function clearSession() {
   sessionStorage.removeItem(UNLOCKED_KEY);
   sessionStorage.removeItem('gantt-pin');
 }
+
+// GitHub API auto-save
+const GH_TOKEN_KEY = 'gantt-gh-token';
+const GH_REPO = 'HCHODUBLIN/gantt-planner';
+const GH_FILE = 'react-app/public/tasks.encrypted.json';
+const GH_BRANCH = 'react-refactor';
+
+export function getGitHubToken() {
+  return localStorage.getItem(GH_TOKEN_KEY) || null;
+}
+
+export function setGitHubToken(token) {
+  localStorage.setItem(GH_TOKEN_KEY, token);
+}
+
+export function clearGitHubToken() {
+  localStorage.removeItem(GH_TOKEN_KEY);
+}
+
+export async function saveToGitHub(data, pin) {
+  const token = getGitHubToken();
+  if (!token) throw new Error('No GitHub token configured');
+
+  const encrypted = await encrypt(data, pin);
+
+  // Get current file SHA (needed for update)
+  const getResp = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}?ref=${GH_BRANCH}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  let sha = null;
+  if (getResp.ok) {
+    const fileData = await getResp.json();
+    sha = fileData.sha;
+  }
+
+  // Create or update file
+  const body = {
+    message: 'Auto-save encrypted data',
+    content: btoa(encrypted),
+    branch: GH_BRANCH,
+  };
+  if (sha) body.sha = sha;
+
+  const putResp = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!putResp.ok) {
+    const err = await putResp.json();
+    throw new Error(err.message || 'GitHub save failed');
+  }
+
+  return true;
+}

@@ -6,6 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { getCategoryColor } from '../utils/colors';
 import { dateToCol, colToDate, COLS, TODAY_COL, buildMonthWeekHeaders } from '../utils/dates';
 import { saveToServer as saveToServerApi } from '../utils/storage';
+import { getSessionPin as getSessionPinFn, getGitHubToken as getGitHubTokenFn, saveToGitHub as saveToGitHubFn } from '../utils/crypto';
 import FilterBar from './FilterBar';
 import TaskModal from './TaskModal';
 import CategoryModal from './CategoryModal';
@@ -21,7 +22,7 @@ const PRIORITY_CYCLE = { low: 'medium', medium: 'high', high: 'urgent', urgent: 
 const STATUS_CYCLE = { pending: 'progress', progress: 'done', done: 'pending' };
 
 export default function GanttChart() {
-  const { allData, updateData, currentFilter, isActionItems, resetData, saveStatus, setSaveStatus } = useData();
+  const { allData, updateData, currentFilter, isActionItems, resetData, saveStatus, setSaveStatus, isPrivate } = useData();
   const { t, lang } = useI18n();
   const { isDark } = useTheme();
 
@@ -269,13 +270,26 @@ export default function GanttChart() {
   const handleSave = async () => {
     try {
       setSaveStatus('saving');
+      // Try server first (local dev)
       await saveToServerApi(allData);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus(null), 1500);
     } catch {
-      // Server not available (e.g. GitHub Pages) — data is already in localStorage
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus(null), 1500);
+      // Server not available — try GitHub API if private mode
+      if (isPrivate && getSessionPinFn() && getGitHubTokenFn()) {
+        try {
+          await saveToGitHubFn(allData, getSessionPinFn());
+          setSaveStatus('saved');
+          setTimeout(() => setSaveStatus(null), 1500);
+        } catch (e) {
+          setSaveStatus('error');
+          setTimeout(() => setSaveStatus(null), 2000);
+        }
+      } else {
+        // Just localStorage
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus(null), 1500);
+      }
     }
   };
 
