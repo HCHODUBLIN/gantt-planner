@@ -313,21 +313,6 @@ export default function WeeklyPlanner() {
           </div>
         </div>
 
-        <div className="header-info">
-          <div className="info-block">
-            <div className="info-label">{t('focusLabel')}</div>
-            <div className="info-value">{focusProject}</div>
-          </div>
-          <div className="info-block">
-            <div className="info-label">{t('trainingLabel')}</div>
-            <div className="info-value">{currentTraining}</div>
-          </div>
-          <div className="info-block">
-            <div className="info-label">{t('goalLabel')}</div>
-            <div className="info-value">{routine.exercise || t('defaultGoal')}</div>
-          </div>
-        </div>
-
         <div className="controls">
           <div className="week-selector">
             <label>{t('weekLabel')}</label>
