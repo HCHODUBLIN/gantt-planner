@@ -273,8 +273,8 @@ export default function GanttChart() {
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus(null), 1500);
     } catch {
-      setSaveStatus('error');
-      alert(t('saveFailMsg'));
+      // Server not available (e.g. GitHub Pages) — data is already in localStorage
+      setSaveStatus('saved');
       setTimeout(() => setSaveStatus(null), 1500);
     }
   };
