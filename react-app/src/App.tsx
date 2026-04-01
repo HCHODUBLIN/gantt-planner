@@ -14,7 +14,7 @@ export default function App() {
   const { t } = useI18n();
 
   const handleExportEncrypted = () => {
-    const pin = prompt(t('exportEncPrompt'));
+    const pin = prompt(t('exportEncPrompt') as string);
     if (pin && pin.length >= 4) {
       exportEncrypted(pin);
     }

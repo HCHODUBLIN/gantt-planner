@@ -2,17 +2,22 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { loadFromLocalStorage, saveToLocalStorage, autoSaveToServer, clearLocalStorage } from '../utils/storage';
 import { decrypt, encrypt, isUnlocked, setUnlocked, getSessionPin, setSessionPin, clearSession } from '../utils/crypto';
 import demoTasks from '../data/demo-tasks.json';
+import type { AllData, Task, DataContextValue } from '../types';
 
-const DataContext = createContext();
+const DataContext = createContext<DataContextValue | null>(null);
 
-export function DataProvider({ children }) {
-  const [allData, setAllData] = useState(null);
-  const [currentFilter, setCurrentFilter] = useState(new Set(['all']));
-  const [saveStatus, setSaveStatus] = useState(null);
-  const [isPrivate, setIsPrivate] = useState(false); // true = unlocked with PIN
-  const [showPinModal, setShowPinModal] = useState(false);
-  const [pinError, setPinError] = useState(null);
-  const dataRef = useRef(null);
+interface DataProviderProps {
+  children: React.ReactNode;
+}
+
+export function DataProvider({ children }: DataProviderProps) {
+  const [allData, setAllData] = useState<AllData | null>(null);
+  const [currentFilter, setCurrentFilter] = useState<Set<string>>(new Set(['all']));
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [isPrivate, setIsPrivate] = useState<boolean>(false); // true = unlocked with PIN
+  const [showPinModal, setShowPinModal] = useState<boolean>(false);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const dataRef = useRef<AllData | null>(null);
 
   // Load data
   useEffect(() => {
@@ -23,7 +28,7 @@ export function DataProvider({ children }) {
           const resp = await fetch(import.meta.env.BASE_URL + 'tasks.encrypted.json');
           if (resp.ok) {
             const encData = await resp.text();
-            const data = await decrypt(encData, getSessionPin());
+            const data = await decrypt(encData, getSessionPin()!);
             setAllData(data);
             dataRef.current = data;
             setIsPrivate(true);
@@ -46,14 +51,15 @@ export function DataProvider({ children }) {
       }
 
       // Default: load demo data
-      setAllData(demoTasks);
-      dataRef.current = demoTasks;
+      const demo = demoTasks as AllData;
+      setAllData(demo);
+      dataRef.current = demo;
     }
     load();
   }, []);
 
   // Unlock with PIN
-  const unlockWithPin = useCallback(async (pin) => {
+  const unlockWithPin = useCallback(async (pin: string): Promise<boolean> => {
     try {
       const resp = await fetch(import.meta.env.BASE_URL + 'tasks.encrypted.json');
       if (!resp.ok) {
@@ -82,12 +88,13 @@ export function DataProvider({ children }) {
     clearSession();
     clearLocalStorage();
     setIsPrivate(false);
-    setAllData(demoTasks);
-    dataRef.current = demoTasks;
+    const demo = demoTasks as AllData;
+    setAllData(demo);
+    dataRef.current = demo;
   }, []);
 
   // Export encrypted data (for committing to git)
-  const exportEncrypted = useCallback(async (pin) => {
+  const exportEncrypted = useCallback(async (pin: string): Promise<void> => {
     if (!dataRef.current) return;
     const encrypted = await encrypt(dataRef.current, pin);
     const blob = new Blob([encrypted], { type: 'text/plain' });
@@ -102,7 +109,7 @@ export function DataProvider({ children }) {
   }, []);
 
   // Persist + auto-save
-  const persistData = useCallback((newData) => {
+  const persistData = useCallback((newData: AllData) => {
     setAllData(newData);
     dataRef.current = newData;
     saveToLocalStorage(newData);
@@ -113,9 +120,9 @@ export function DataProvider({ children }) {
   }, []);
 
   // Update a shallow copy of allData and persist
-  const updateData = useCallback((updater) => {
+  const updateData = useCallback((updater: AllData | ((prev: AllData) => AllData)) => {
     setAllData(prev => {
-      const next = typeof updater === 'function' ? updater(prev) : updater;
+      const next = typeof updater === 'function' ? updater(prev as AllData) : updater;
       dataRef.current = next;
       saveToLocalStorage(next);
       autoSaveToServer(next, () => {
@@ -127,7 +134,7 @@ export function DataProvider({ children }) {
   }, []);
 
   // Filter logic
-  const toggleFilter = useCallback((tag) => {
+  const toggleFilter = useCallback((tag: string) => {
     setCurrentFilter(prev => {
       const next = new Set(prev);
       if (tag === 'all') {
@@ -145,7 +152,7 @@ export function DataProvider({ children }) {
   }, []);
 
   // Helper: find task by id
-  const findTask = useCallback((taskId) => {
+  const findTask = useCallback((taskId: string): Task | null => {
     if (!dataRef.current) return null;
     for (const cat of dataRef.current.categories) {
       const task = (cat.tasks || []).find(t => t.id === taskId);
@@ -155,16 +162,16 @@ export function DataProvider({ children }) {
   }, []);
 
   // Check if category is Action Items
-  const isActionItems = useCallback((catIdx) => {
+  const isActionItems = useCallback((catIdx: number): boolean => {
     if (!dataRef.current) return false;
     const cat = dataRef.current.categories[catIdx];
     return cat && cat.name && cat.name.includes('Action Items');
   }, []);
 
   // Get all tags
-  const getAllTags = useCallback(() => {
+  const getAllTags = useCallback((): string[] => {
     if (!dataRef.current) return [];
-    const tags = new Set();
+    const tags = new Set<string>();
     (dataRef.current.categories || []).forEach(cat => {
       (cat.tags || []).forEach(tag => {
         if (!tag.startsWith('divider')) tags.add(tag);
@@ -209,6 +216,8 @@ export function DataProvider({ children }) {
   );
 }
 
-export function useData() {
-  return useContext(DataContext);
+export function useData(): DataContextValue {
+  const ctx = useContext(DataContext);
+  if (!ctx) throw new Error('useData must be used within DataProvider');
+  return ctx;
 }

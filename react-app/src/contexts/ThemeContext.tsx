@@ -1,10 +1,15 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { getTheme, setTheme as persistTheme } from '../utils/storage';
+import type { ThemeContextValue } from '../types';
 
-const ThemeContext = createContext();
+const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState(() => getTheme());
+interface ThemeProviderProps {
+  children: React.ReactNode;
+}
+
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const [theme, setThemeState] = useState<string>(() => getTheme());
 
   useEffect(() => {
     document.body.classList.toggle('dark', theme === 'dark');
@@ -25,6 +30,8 @@ export function ThemeProvider({ children }) {
   );
 }
 
-export function useTheme() {
-  return useContext(ThemeContext);
+export function useTheme(): ThemeContextValue {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
+  return ctx;
 }

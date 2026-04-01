@@ -1,5 +1,5 @@
 // Category color palette - Notion-inspired muted tones (light mode)
-export const catColorsLight = [
+export const catColorsLight: string[] = [
   'linear-gradient(135deg, #487CA5, #5A93BE)',  // notion blue
   'linear-gradient(135deg, #548164, #6A9A7A)',  // notion green
   'linear-gradient(135deg, #CC782F, #D99050)',  // notion orange
@@ -18,7 +18,7 @@ export const catColorsLight = [
 ];
 
 // Dark mode - Notion dark text colors as bar fills
-export const catColorsDark = [
+export const catColorsDark: string[] = [
   'linear-gradient(135deg, #528BD6, #6BA0E5)',  // notion blue
   'linear-gradient(135deg, #5BA878, #70BD8D)',  // notion green
   'linear-gradient(135deg, #D68A48, #E4A060)',  // notion orange
@@ -36,13 +36,13 @@ export const catColorsDark = [
   'linear-gradient(135deg, #C49D7A, #D5B190)',  // caramel
 ];
 
-export function getCategoryColor(catIdx, isDark) {
+export function getCategoryColor(catIdx: number, isDark: boolean): string {
   const colors = isDark ? catColorsDark : catColorsLight;
   return colors[catIdx % colors.length];
 }
 
 // Task class border-left colors for weekly planner cards
-export const taskClsColors = {
+export const taskClsColors: Record<string, string> = {
   'c-map': '#6366f1',
   'c-paper': '#f59e0b',
   'c-comm': '#10b981',

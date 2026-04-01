@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 import { useI18n } from '../contexts/I18nContext';
@@ -8,34 +8,64 @@ import { loadWeeklyPlan, saveWeeklyPlan as persistWeeklyPlan, getWeekKey, saveTo
 import { taskClsColors } from '../utils/colors';
 import ActionItemsPanel from './ActionItemsPanel';
 import ToggleGroup from './ToggleGroup';
+import type { Task, WeeklyPlan as WeeklyPlanType, WeeklySlotEntry, RoutineBlock } from '../types';
 
-const PRIORITY_CLASSES = { urgent: 'priority-urgent', high: 'priority-high', medium: 'priority-medium', low: 'priority-low' };
+const PRIORITY_CLASSES: Record<string, string> = { urgent: 'priority-urgent', high: 'priority-high', medium: 'priority-medium', low: 'priority-low' };
+
+interface DragRef {
+  task: { taskId: string } | null;
+  fromActionPanel: boolean;
+  sourceSlot: { dayKey: string; period: string } | null;
+  idx: number | null;
+}
+
+interface EditModalState {
+  open: boolean;
+  taskId: string | null;
+  dayKey: string | null;
+  period: string | null;
+  index: number | null;
+  note: string;
+}
+
+interface AddModalState {
+  open: boolean;
+  dayKey: string | null;
+  period: string | null;
+}
+
+interface AddFormState {
+  name: string;
+  priority: string;
+  category: string;
+  note: string;
+}
 
 export default function WeeklyPlanner() {
   const { allData, updateData } = useData();
   const { t, lang } = useI18n();
   const { isDark } = useTheme();
 
-  const [currentWeekStart, setCurrentWeekStart] = useState(() => getWeekStart(new Date(2026, 2, 23)));
-  const [weeklyPlan, setWeeklyPlan] = useState({});
-  const [allTasks, setAllTasks] = useState([]);
-  const [actionItems, setActionItems] = useState([]);
-  const [routineConfig, setRoutineConfig] = useState(null);
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getWeekStart(new Date(2026, 2, 23)));
+  const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlanType>({});
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
+  const [actionItems, setActionItems] = useState<Task[]>([]);
+  const [routineConfig, setRoutineConfig] = useState<{ blocks?: RoutineBlock[]; saturday?: string; sunday?: string; exercise?: string } | null>(null);
 
   // Drag state
-  const dragRef = useRef({ task: null, fromActionPanel: false, sourceSlot: null, idx: null });
+  const dragRef = useRef<DragRef>({ task: null, fromActionPanel: false, sourceSlot: null, idx: null });
 
   // Edit modal state
-  const [editModal, setEditModal] = useState({ open: false, taskId: null, dayKey: null, period: null, index: null, note: '' });
+  const [editModal, setEditModal] = useState<EditModalState>({ open: false, taskId: null, dayKey: null, period: null, index: null, note: '' });
   // Add modal state
-  const [addModal, setAddModal] = useState({ open: false, dayKey: null, period: null });
-  const [addForm, setAddForm] = useState({ name: '', priority: 'medium', category: 'c-action', note: '' });
+  const [addModal, setAddModal] = useState<AddModalState>({ open: false, dayKey: null, period: null });
+  const [addForm, setAddForm] = useState<AddFormState>({ name: '', priority: 'medium', category: 'c-action', note: '' });
 
   // Load tasks from data context
   useEffect(() => {
     if (!allData) return;
-    const tasks = [];
-    const actions = [];
+    const tasks: Task[] = [];
+    const actions: Task[] = [];
     (allData.categories || []).forEach((cat, catIdx) => {
       const catTasks = (cat.tasks || []).filter(t => t.id);
       tasks.push(...catTasks);
@@ -56,7 +86,7 @@ export default function WeeklyPlanner() {
     setWeeklyPlan(stored);
   }, [currentWeekStart, allData]);
 
-  const saveWP = useCallback((plan) => {
+  const saveWP = useCallback((plan: WeeklyPlanType) => {
     setWeeklyPlan(plan);
     persistWeeklyPlan(currentWeekStart, plan);
     // Also save to allData so it persists with tasks.json
@@ -67,31 +97,31 @@ export default function WeeklyPlanner() {
     }));
   }, [currentWeekStart, updateData]);
 
-  const getTasksForSlot = useCallback((dayKey, period) => {
+  const getTasksForSlot = useCallback((dayKey: string, period: string): WeeklySlotEntry[] => {
     if (!weeklyPlan[dayKey]) return [];
     if (!weeklyPlan[dayKey].tasks) return [];
     return weeklyPlan[dayKey].tasks[period] || [];
   }, [weeklyPlan]);
 
   // Drag handlers
-  const handleActionDragStart = useCallback((taskId) => {
+  const handleActionDragStart = useCallback((taskId: string) => {
     dragRef.current = { task: { taskId }, fromActionPanel: true, sourceSlot: null, idx: null };
   }, []);
 
-  const handleCardDragStart = useCallback((taskId, dayKey, period, idx) => {
+  const handleCardDragStart = useCallback((taskId: string, dayKey: string, period: string, idx: number) => {
     dragRef.current = { task: { taskId }, fromActionPanel: false, sourceSlot: { dayKey, period }, idx };
   }, []);
 
-  const handleDropOnSlot = useCallback((dayKey, period) => {
+  const handleDropOnSlot = useCallback((dayKey: string, period: string) => {
     const { task, fromActionPanel, sourceSlot, idx } = dragRef.current;
     if (!task) return;
 
-    const plan = JSON.parse(JSON.stringify(weeklyPlan));
+    const plan: WeeklyPlanType = JSON.parse(JSON.stringify(weeklyPlan));
 
     if (fromActionPanel) {
       if (!plan[dayKey]) plan[dayKey] = { tasks: {} };
       if (!plan[dayKey].tasks[period]) plan[dayKey].tasks[period] = [];
-      const existing = plan[dayKey].tasks[period].find(t =>
+      const existing = plan[dayKey].tasks[period].find((t: WeeklySlotEntry) =>
         (typeof t === 'string' ? t : t.id) === task.taskId
       );
       if (!existing) {
@@ -100,7 +130,7 @@ export default function WeeklyPlanner() {
     } else if (sourceSlot) {
       // Move from one slot to another
       const fromTasks = plan[sourceSlot.dayKey]?.tasks?.[sourceSlot.period];
-      if (fromTasks && idx < fromTasks.length) {
+      if (fromTasks && idx !== null && idx < fromTasks.length) {
         const [moved] = fromTasks.splice(idx, 1);
         if (!plan[dayKey]) plan[dayKey] = { tasks: {} };
         if (!plan[dayKey].tasks[period]) plan[dayKey].tasks[period] = [];
@@ -112,13 +142,13 @@ export default function WeeklyPlanner() {
     dragRef.current = { task: null, fromActionPanel: false, sourceSlot: null, idx: null };
   }, [weeklyPlan, saveWP]);
 
-  const handleDropReturn = useCallback((e) => {
+  const handleDropReturn = useCallback((_e: React.DragEvent) => {
     const { task, fromActionPanel, sourceSlot, idx } = dragRef.current;
     if (!task || fromActionPanel) return;
     if (sourceSlot) {
-      const plan = JSON.parse(JSON.stringify(weeklyPlan));
+      const plan: WeeklyPlanType = JSON.parse(JSON.stringify(weeklyPlan));
       const tasks = plan[sourceSlot.dayKey]?.tasks?.[sourceSlot.period];
-      if (tasks && idx < tasks.length) {
+      if (tasks && idx !== null && idx < tasks.length) {
         tasks.splice(idx, 1);
         saveWP(plan);
       }
@@ -126,8 +156,8 @@ export default function WeeklyPlanner() {
     dragRef.current = { task: null, fromActionPanel: false, sourceSlot: null, idx: null };
   }, [weeklyPlan, saveWP]);
 
-  const removeTaskFromSlot = useCallback((dayKey, period, idx) => {
-    const plan = JSON.parse(JSON.stringify(weeklyPlan));
+  const removeTaskFromSlot = useCallback((dayKey: string, period: string, idx: number) => {
+    const plan: WeeklyPlanType = JSON.parse(JSON.stringify(weeklyPlan));
     const tasks = plan[dayKey]?.tasks?.[period];
     if (tasks) {
       tasks.splice(idx, 1);
@@ -136,19 +166,19 @@ export default function WeeklyPlanner() {
   }, [weeklyPlan, saveWP]);
 
   // Edit modal
-  const openEditModal = useCallback((taskId, dayKey, period, idx, note) => {
+  const openEditModal = useCallback((taskId: string, dayKey: string, period: string, idx: number, note: string) => {
     setEditModal({ open: true, taskId, dayKey, period, index: idx, note: note || '' });
   }, []);
 
   const saveEditedTask = useCallback(() => {
     const { dayKey, period, index } = editModal;
-    const plan = JSON.parse(JSON.stringify(weeklyPlan));
-    const tasks = plan[dayKey]?.tasks?.[period];
-    if (tasks && index < tasks.length) {
+    const plan: WeeklyPlanType = JSON.parse(JSON.stringify(weeklyPlan));
+    const tasks = plan[dayKey!]?.tasks?.[period!];
+    if (tasks && index !== null && index < tasks.length) {
       if (typeof tasks[index] === 'string') {
-        tasks[index] = { id: tasks[index], note: editModal.note };
+        tasks[index] = { id: tasks[index] as string, note: editModal.note };
       } else {
-        tasks[index] = { ...tasks[index], note: editModal.note };
+        tasks[index] = { ...(tasks[index] as { id: string; note?: string }), note: editModal.note };
       }
     }
     saveWP(plan);
@@ -156,37 +186,37 @@ export default function WeeklyPlanner() {
   }, [editModal, weeklyPlan, saveWP]);
 
   // Add modal
-  const openAddModal = useCallback((dayKey, period) => {
+  const openAddModal = useCallback((dayKey: string, period: string) => {
     setAddForm({ name: '', priority: 'medium', category: 'c-action', note: '' });
     setAddModal({ open: true, dayKey, period });
   }, []);
 
   const addNewTask = useCallback(() => {
     if (!addForm.name.trim()) { alert(t('enterTaskName')); return; }
-    const newTask = {
+    const newTask: Task = {
       id: `manual-${Date.now()}`,
       name: addForm.name.trim(),
-      priority: addForm.priority,
+      priority: addForm.priority as Task['priority'],
       cls: addForm.category,
       status: 'progress',
-      start: addModal.dayKey,
-      end: addModal.dayKey
+      start: addModal.dayKey!,
+      end: addModal.dayKey!
     };
     setAllTasks(prev => [...prev, newTask]);
-    const plan = JSON.parse(JSON.stringify(weeklyPlan));
-    if (!plan[addModal.dayKey]) plan[addModal.dayKey] = { tasks: {} };
-    if (!plan[addModal.dayKey].tasks[addModal.period]) plan[addModal.dayKey].tasks[addModal.period] = [];
-    plan[addModal.dayKey].tasks[addModal.period].push({ id: newTask.id, note: addForm.note });
+    const plan: WeeklyPlanType = JSON.parse(JSON.stringify(weeklyPlan));
+    if (!plan[addModal.dayKey!]) plan[addModal.dayKey!] = { tasks: {} };
+    if (!plan[addModal.dayKey!].tasks[addModal.period!]) plan[addModal.dayKey!].tasks[addModal.period!] = [];
+    plan[addModal.dayKey!].tasks[addModal.period!].push({ id: newTask.id, note: addForm.note });
     saveWP(plan);
     setAddModal({ open: false, dayKey: null, period: null });
   }, [addForm, addModal, weeklyPlan, saveWP, t]);
 
   // Day note
-  const editDayNote = useCallback((dayKey) => {
+  const editDayNote = useCallback((dayKey: string) => {
     const currentNote = weeklyPlan[dayKey]?.note || '';
-    const newNote = prompt(t('notePrompt'), currentNote.trim());
+    const newNote = prompt(t('notePrompt') as string, currentNote.trim());
     if (newNote !== null) {
-      const plan = JSON.parse(JSON.stringify(weeklyPlan));
+      const plan: WeeklyPlanType = JSON.parse(JSON.stringify(weeklyPlan));
       if (!plan[dayKey]) plan[dayKey] = { tasks: {} };
       plan[dayKey].note = newNote;
       saveWP(plan);
@@ -201,7 +231,7 @@ export default function WeeklyPlanner() {
   // Focus & training from Action Items
   const focusProject = (() => {
     const focus = actionItems.filter(t => ['urgent', 'high'].includes(t.priority));
-    return focus.length > 0 ? focus[0].name : t('noFocus');
+    return focus.length > 0 ? focus[0].name : (t('noFocus') as string);
   })();
 
   const currentTraining = (() => {
@@ -212,11 +242,11 @@ export default function WeeklyPlanner() {
     );
     if (training.length > 0) return training[0].name;
     // Fallback: second action item if exists
-    return actionItems.length > 1 ? actionItems[1].name : t('noFocus');
+    return actionItems.length > 1 ? actionItems[1].name : (t('noFocus') as string);
   })();
 
   // Save to server
-  const [saveStatus, setSaveStatus] = useState(null);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const handleSave = async () => {
     const saved = localStorage.getItem('gantt-data');
     if (!saved) { alert(t('noData')); return; }
@@ -235,12 +265,12 @@ export default function WeeklyPlanner() {
   // Export markdown
   const exportMarkdown = () => {
     const isEn = lang === 'en';
-    const dayNames = t('days');
+    const dayNames = t('days') as string[];
     let md = `# ${isEn ? 'Weekly Planner' : '주간 플래너'} ${formatDateKey(currentWeekStart)} ~ ${formatDateKey(new Date(currentWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000))}\n\n`;
     md += `## 🎯 ${isEn ? 'This Week' : '이번주 핵심'}\n`;
     md += `- **${isEn ? 'Focus Project' : '핵심 프로젝트'}**: ${focusProject}\n`;
     md += `- **${isEn ? 'Current Training' : '현재 학습'}**: ${currentTraining}\n`;
-    md += `- **${isEn ? 'Goal' : '목표'}**: ${routineConfig?.exercise || t('defaultGoal')}\n\n`;
+    md += `- **${isEn ? 'Goal' : '목표'}**: ${routineConfig?.exercise || (t('defaultGoal') as string)}\n\n`;
 
     for (let i = 0; i < 7; i++) {
       const date = new Date(currentWeekStart);
@@ -259,9 +289,9 @@ export default function WeeklyPlanner() {
         md += '\n'; continue;
       }
       const blocks = routineConfig?.blocks || [
-        { key: 'morning', emoji: '🌅', label: t('morning'), hours: '09-12' },
-        { key: 'afternoon', emoji: '☀️', label: t('afternoon'), hours: '13-17' },
-        { key: 'evening', emoji: '🌙', label: t('evening'), hours: '18-19' },
+        { key: 'morning', emoji: '🌅', label: t('morning') as string, hours: '09-12', desc: '' },
+        { key: 'afternoon', emoji: '☀️', label: t('afternoon') as string, hours: '13-17', desc: '' },
+        { key: 'evening', emoji: '🌙', label: t('evening') as string, hours: '18-19', desc: '' },
       ];
       blocks.forEach(b => {
         const tasks = getTasksForSlot(dayKey, b.key);
@@ -293,14 +323,14 @@ export default function WeeklyPlanner() {
   if (!allData) return <div style={{ padding: '24px' }}>Loading...</div>;
 
   const routine = routineConfig || {};
-  const blocks = routine.blocks || [
-    { key: 'morning', emoji: '🌅', label: t('morning'), hours: '09-12', desc: '' },
-    { key: 'afternoon', emoji: '☀️', label: t('afternoon'), hours: '13-17', desc: '' },
-    { key: 'evening', emoji: '🌙', label: t('evening'), hours: '18-19', desc: '' },
+  const blocks: RoutineBlock[] = routine.blocks || [
+    { key: 'morning', emoji: '🌅', label: t('morning') as string, hours: '09-12', desc: '' },
+    { key: 'afternoon', emoji: '☀️', label: t('afternoon') as string, hours: '13-17', desc: '' },
+    { key: 'evening', emoji: '🌙', label: t('evening') as string, hours: '18-19', desc: '' },
   ];
-  const dayNames = t('days');
+  const dayNames = t('days') as string[];
 
-  const saveBtnText = saveStatus === 'saved' ? '✅ Saved' : saveStatus === 'saving' ? '⏳' : saveStatus === 'error' ? '❌ Error' : '💾 ' + t('save');
+  const saveBtnText = saveStatus === 'saved' ? '✅ Saved' : saveStatus === 'saving' ? '⏳' : saveStatus === 'error' ? '❌ Error' : '💾 ' + (t('save') as string);
 
   return (
     <div className="weekly-container">
@@ -319,7 +349,7 @@ export default function WeeklyPlanner() {
             <input
               type="date"
               value={formatDateKey(currentWeekStart)}
-              onChange={e => setCurrentWeekStart(getWeekStart(new Date(e.target.value)))}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentWeekStart(getWeekStart(new Date(e.target.value)))}
             />
           </div>
           <button onClick={goToCurrentWeek}>{t('thisWeek')}</button>
@@ -356,15 +386,14 @@ export default function WeeklyPlanner() {
                   {i === 5 ? (
                     <div className="rest-day time-block">
                       <div style={{ fontSize: '24px' }}>😴</div>
-                      <div>{routine.saturday || t('rest')}</div>
+                      <div>{routine.saturday || (t('rest') as string)}</div>
                     </div>
                   ) : i === 6 ? (
                     <TimeBlock
                       dayKey={dayKey}
                       period="full-day"
-                      label={`📚 ${routine.sunday || t('study')}`}
+                      label={`📚 ${routine.sunday || (t('study') as string)}`}
                       className="time-block"
-                      style={{}}
                       tasks={getTasksForSlot(dayKey, 'full-day')}
                       allTasks={allTasks}
                       onDrop={handleDropOnSlot}
@@ -413,7 +442,7 @@ export default function WeeklyPlanner() {
 
       {/* Edit Modal */}
       {editModal.open && (
-        <div className="modal-overlay active" onClick={e => e.target === e.currentTarget && setEditModal({ ...editModal, open: false })}>
+        <div className="modal-overlay active" onClick={(e: React.MouseEvent) => e.target === e.currentTarget && setEditModal({ ...editModal, open: false })}>
           <div className="modal">
             <div className="modal-title">{t('editTitle')}</div>
             <div className="form-group">
@@ -430,7 +459,7 @@ export default function WeeklyPlanner() {
               <textarea
                 className="form-control"
                 value={editModal.note}
-                onChange={e => setEditModal(prev => ({ ...prev, note: e.target.value }))}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditModal(prev => ({ ...prev, note: e.target.value }))}
               />
             </div>
             <div className="form-actions">
@@ -443,7 +472,7 @@ export default function WeeklyPlanner() {
 
       {/* Add Modal */}
       {addModal.open && (
-        <div className="modal-overlay active" onClick={e => e.target === e.currentTarget && setAddModal({ ...addModal, open: false })}>
+        <div className="modal-overlay active" onClick={(e: React.MouseEvent) => e.target === e.currentTarget && setAddModal({ ...addModal, open: false })}>
           <div className="modal">
             <div className="modal-title">{t('addTitle')}</div>
             <div className="form-group">
@@ -452,13 +481,13 @@ export default function WeeklyPlanner() {
                 type="text"
                 className="form-control"
                 value={addForm.name}
-                onChange={e => setAddForm(prev => ({ ...prev, name: e.target.value }))}
-                placeholder={t('taskPlaceholder')}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAddForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder={t('taskPlaceholder') as string}
               />
             </div>
             <div className="form-group">
               <label className="form-label">{t('priority')}</label>
-              <select className="form-control" value={addForm.priority} onChange={e => setAddForm(prev => ({ ...prev, priority: e.target.value }))}>
+              <select className="form-control" value={addForm.priority} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAddForm(prev => ({ ...prev, priority: e.target.value }))}>
                 <option value="medium">{t('medium')}</option>
                 <option value="high">{t('high')}</option>
                 <option value="urgent">{t('urgent')}</option>
@@ -467,7 +496,7 @@ export default function WeeklyPlanner() {
             </div>
             <div className="form-group">
               <label className="form-label">{t('category')}</label>
-              <select className="form-control" value={addForm.category} onChange={e => setAddForm(prev => ({ ...prev, category: e.target.value }))}>
+              <select className="form-control" value={addForm.category} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAddForm(prev => ({ ...prev, category: e.target.value }))}>
                 <option value="c-action">{t('action')}</option>
                 <option value="c-proj">{t('project')}</option>
                 <option value="c-course">{t('course')}</option>
@@ -480,8 +509,8 @@ export default function WeeklyPlanner() {
               <textarea
                 className="form-control"
                 value={addForm.note}
-                onChange={e => setAddForm(prev => ({ ...prev, note: e.target.value }))}
-                placeholder={t('memoPlaceholder')}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAddForm(prev => ({ ...prev, note: e.target.value }))}
+                placeholder={t('memoPlaceholder') as string}
               />
             </div>
             <div className="form-actions">
@@ -495,27 +524,45 @@ export default function WeeklyPlanner() {
   );
 }
 
-function TimeBlock({ dayKey, period, label, className, style, tasks, allTasks, onDrop, onRemove, onCardDragStart, onCardClick, onBlockClick, t, lang }) {
-  const PRIORITY_LABELS_LOCAL = { urgent: t('urgent'), high: t('high'), medium: t('medium'), low: t('low') };
+interface TimeBlockProps {
+  dayKey: string;
+  period: string;
+  label: string;
+  className: string;
+  style?: React.CSSProperties;
+  tasks: WeeklySlotEntry[];
+  allTasks: Task[];
+  onDrop: (dayKey: string, period: string) => void;
+  onRemove: (dayKey: string, period: string, idx: number) => void;
+  onCardDragStart: (taskId: string, dayKey: string, period: string, idx: number) => void;
+  onCardClick: (taskId: string, dayKey: string, period: string, idx: number, note: string) => void;
+  onBlockClick: (dayKey: string, period: string) => void;
+  t: (key: string) => string | string[];
+  lang: string;
+}
 
-  const handleDragOver = (e) => {
+function TimeBlock({ dayKey, period, label, className, style, tasks, allTasks, onDrop, onRemove, onCardDragStart, onCardClick, onBlockClick, t, lang }: TimeBlockProps) {
+  const PRIORITY_LABELS_LOCAL: Record<string, string | string[]> = { urgent: t('urgent'), high: t('high'), medium: t('medium'), low: t('low') };
+
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.style.outline = '2px dashed var(--accent)';
+    (e.currentTarget as HTMLElement).style.outline = '2px dashed var(--accent)';
   };
 
-  const handleDragLeave = (e) => {
-    e.currentTarget.style.outline = '';
+  const handleDragLeave = (e: React.DragEvent) => {
+    (e.currentTarget as HTMLElement).style.outline = '';
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.style.outline = '';
+    (e.currentTarget as HTMLElement).style.outline = '';
     onDrop(dayKey, period);
   };
 
-  const handleBlockClick = (e) => {
-    if (e.target === e.currentTarget || e.target.classList.contains('time-label') || e.target.classList.contains('empty-state')) {
+  const handleBlockClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target === e.currentTarget || target.classList.contains('time-label') || target.classList.contains('empty-state')) {
       onBlockClick(dayKey, period);
     }
   };
@@ -541,7 +588,7 @@ function TimeBlock({ dayKey, period, label, className, style, tasks, allTasks, o
         ) : (
           tasks.map((taskIdOrObj, idx) => {
             const taskId = typeof taskIdOrObj === 'string' ? taskIdOrObj : taskIdOrObj.id;
-            const taskNote = typeof taskIdOrObj === 'object' ? taskIdOrObj.note : '';
+            const taskNote = typeof taskIdOrObj === 'object' ? (taskIdOrObj.note || '') : '';
             const task = allTasks.find(t2 => t2.id === taskId);
             if (!task) return null;
 
@@ -554,16 +601,16 @@ function TimeBlock({ dayKey, period, label, className, style, tasks, allTasks, o
                 style={{ borderLeft: `3px solid ${borderColor}` }}
                 draggable
                 onDragStart={() => onCardDragStart(taskId, dayKey, period, idx)}
-                onClick={(e) => {
-                  if (!e.target.closest('.task-remove-btn')) {
+                onClick={(e: React.MouseEvent) => {
+                  if (!(e.target as HTMLElement).closest('.task-remove-btn')) {
                     onCardClick(taskId, dayKey, period, idx, taskNote);
                   }
                 }}
               >
                 <button
                   className="task-remove-btn"
-                  title={t('remove')}
-                  onClick={e => { e.stopPropagation(); onRemove(dayKey, period, idx); }}
+                  title={t('remove') as string}
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); onRemove(dayKey, period, idx); }}
                 >
                   ✕
                 </button>

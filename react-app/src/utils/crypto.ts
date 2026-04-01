@@ -1,8 +1,10 @@
+import type { AllData } from '../types';
+
 // AES-GCM encryption with PBKDF2 key derivation from PIN
 const SALT = new Uint8Array([103,97,110,116,116,45,112,108,97,110,110,101,114,45,115,97]); // "gantt-planner-sa"
 const ITERATIONS = 100000;
 
-async function deriveKey(pin) {
+async function deriveKey(pin: string): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     'raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']
@@ -16,7 +18,7 @@ async function deriveKey(pin) {
   );
 }
 
-export async function encrypt(data, pin) {
+export async function encrypt(data: AllData, pin: string): Promise<string> {
   const key = await deriveKey(pin);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const enc = new TextEncoder();
@@ -32,7 +34,7 @@ export async function encrypt(data, pin) {
   return btoa(String.fromCharCode(...combined));
 }
 
-export async function decrypt(encryptedBase64, pin) {
+export async function decrypt(encryptedBase64: string, pin: string): Promise<AllData> {
   const key = await deriveKey(pin);
   const combined = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
   const iv = combined.slice(0, 12);
@@ -42,17 +44,16 @@ export async function decrypt(encryptedBase64, pin) {
     key,
     ciphertext
   );
-  return JSON.parse(new TextDecoder().decode(decrypted));
+  return JSON.parse(new TextDecoder().decode(decrypted)) as AllData;
 }
 
-const PIN_KEY = 'gantt-pin-hash';
 const UNLOCKED_KEY = 'gantt-unlocked';
 
-export function isUnlocked() {
+export function isUnlocked(): boolean {
   return sessionStorage.getItem(UNLOCKED_KEY) === 'true';
 }
 
-export function setUnlocked(val) {
+export function setUnlocked(val: boolean): void {
   if (val) {
     sessionStorage.setItem(UNLOCKED_KEY, 'true');
   } else {
@@ -60,15 +61,15 @@ export function setUnlocked(val) {
   }
 }
 
-export function getSessionPin() {
+export function getSessionPin(): string | null {
   return sessionStorage.getItem('gantt-pin') || null;
 }
 
-export function setSessionPin(pin) {
+export function setSessionPin(pin: string): void {
   sessionStorage.setItem('gantt-pin', pin);
 }
 
-export function clearSession() {
+export function clearSession(): void {
   sessionStorage.removeItem(UNLOCKED_KEY);
   sessionStorage.removeItem('gantt-pin');
 }
@@ -79,19 +80,19 @@ const GH_REPO = 'HCHODUBLIN/gantt-planner';
 const GH_FILE = 'react-app/public/tasks.encrypted.json';
 const GH_BRANCH = 'react-refactor';
 
-export function getGitHubToken() {
+export function getGitHubToken(): string | null {
   return localStorage.getItem(GH_TOKEN_KEY) || null;
 }
 
-export function setGitHubToken(token) {
+export function setGitHubToken(token: string): void {
   localStorage.setItem(GH_TOKEN_KEY, token);
 }
 
-export function clearGitHubToken() {
+export function clearGitHubToken(): void {
   localStorage.removeItem(GH_TOKEN_KEY);
 }
 
-export async function saveToGitHub(data, pin) {
+export async function saveToGitHub(data: AllData, pin: string): Promise<boolean> {
   const token = getGitHubToken();
   if (!token) throw new Error('No GitHub token configured');
 
@@ -102,14 +103,14 @@ export async function saveToGitHub(data, pin) {
     headers: { Authorization: `Bearer ${token}` }
   });
 
-  let sha = null;
+  let sha: string | null = null;
   if (getResp.ok) {
     const fileData = await getResp.json();
     sha = fileData.sha;
   }
 
   // Create or update file
-  const body = {
+  const body: Record<string, string> = {
     message: 'Auto-save encrypted data',
     content: btoa(encrypted),
     branch: GH_BRANCH,

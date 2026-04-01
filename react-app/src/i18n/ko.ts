@@ -1,4 +1,6 @@
-const ko = {
+import type { Translations } from '../types';
+
+const ko: Translations = {
   // Gantt chart
   title: '업무 간트 차트 2026',
   subtitle: '2026년 3월 ~ 9월',
@@ -112,7 +114,6 @@ const ko = {
   morning: '아침',
   afternoon: '오후',
   evening: '저녁',
-  days: ['월', '화', '수', '목', '금', '토', '일'],
   actionItems: '🔴 Action Items',
   actionHint: '아래 시간 블록으로 드래그하세요',
   noData: '저장할 데이터가 없습니다.',

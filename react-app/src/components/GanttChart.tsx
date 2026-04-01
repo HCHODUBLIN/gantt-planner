@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 import { useI18n } from '../contexts/I18nContext';
@@ -14,12 +14,37 @@ import TagManageModal from './TagManageModal';
 import RoutineSection from './RoutineSection';
 import RoutineModal from './RoutineModal';
 import ToggleGroup from './ToggleGroup';
+import type { Task, Category, TaskPriority, TaskStatus } from '../types';
 
-const PRIORITY_MAP = { urgent: 'p-urgent', high: 'p-high', medium: 'p-medium', low: 'p-low' };
-const PRIORITY_LABEL = { urgent: 'URGENT', high: 'HIGH', medium: 'MED', low: 'LOW' };
-const STATUS_CLASS = { done: 's-done', progress: 's-progress', pending: 's-pending' };
-const PRIORITY_CYCLE = { low: 'medium', medium: 'high', high: 'urgent', urgent: 'low' };
-const STATUS_CYCLE = { pending: 'progress', progress: 'done', done: 'pending' };
+const PRIORITY_MAP: Record<string, string> = { urgent: 'p-urgent', high: 'p-high', medium: 'p-medium', low: 'p-low' };
+const PRIORITY_LABEL: Record<string, string> = { urgent: 'URGENT', high: 'HIGH', medium: 'MED', low: 'LOW' };
+const STATUS_CLASS: Record<string, string> = { done: 's-done', progress: 's-progress', pending: 's-pending' };
+const PRIORITY_CYCLE: Record<string, TaskPriority> = { low: 'medium', medium: 'high', high: 'urgent', urgent: 'low' };
+const STATUS_CYCLE: Record<string, TaskStatus> = { pending: 'progress', progress: 'done', done: 'pending' };
+
+interface TaskModalState {
+  open: boolean;
+  task: Task | null;
+  isNew: boolean;
+  catIdx: number | null;
+}
+
+interface CatModalState {
+  open: boolean;
+  catIdx: number | null;
+}
+
+interface DragState {
+  task: Task;
+  mode: 'move' | 'start' | 'end';
+  origStart: number;
+  origEnd: number;
+  originX: number;
+}
+
+type FilteredItem =
+  | { type: 'divider'; catIdx: number }
+  | { type: 'category'; cat: Category; catIdx: number; tasks: Task[] };
 
 export default function GanttChart() {
   const { allData, updateData, currentFilter, isActionItems, resetData, saveStatus, setSaveStatus, isPrivate } = useData();
@@ -27,21 +52,21 @@ export default function GanttChart() {
   const { isDark } = useTheme();
 
   // Modals
-  const [taskModal, setTaskModal] = useState({ open: false, task: null, isNew: false, catIdx: null });
-  const [catModal, setCatModal] = useState({ open: false, catIdx: null });
-  const [tagManageOpen, setTagManageOpen] = useState(false);
-  const [routineModalOpen, setRoutineModalOpen] = useState(false);
+  const [taskModal, setTaskModal] = useState<TaskModalState>({ open: false, task: null, isNew: false, catIdx: null });
+  const [catModal, setCatModal] = useState<CatModalState>({ open: false, catIdx: null });
+  const [tagManageOpen, setTagManageOpen] = useState<boolean>(false);
+  const [routineModalOpen, setRoutineModalOpen] = useState<boolean>(false);
 
   // Drag state
-  const dragRef = useRef(null);
-  const dragMovedRef = useRef(false);
-  const [, forceUpdate] = useState(0);
+  const dragRef = useRef<DragState | null>(null);
+  const dragMovedRef = useRef<boolean>(false);
+  const [, forceUpdate] = useState<number>(0);
 
   // Headers (computed once)
   const { monthHeaders, weeks } = buildMonthWeekHeaders();
 
   // Drag handlers for bars
-  const getColFromX = useCallback((x) => {
+  const getColFromX = useCallback((x: number): number => {
     const firstRow = document.querySelector('#gantt-body tr:not(.category-row):not(.section-divider)');
     if (!firstRow) return 0;
     const barCells = firstRow.querySelectorAll('td.bar-cell');
@@ -56,7 +81,7 @@ export default function GanttChart() {
     return barCells.length - 1;
   }, []);
 
-  const startDrag = useCallback((e, task, mode) => {
+  const startDrag = useCallback((e: React.MouseEvent, task: Task, mode: 'move' | 'start' | 'end') => {
     e.preventDefault();
     dragMovedRef.current = false;
     const startCol = dateToCol(task.start);
@@ -67,7 +92,7 @@ export default function GanttChart() {
   }, []);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       if (!dragRef.current) return;
       const col = getColFromX(e.clientX);
       const { task, mode, origStart, origEnd } = dragRef.current;
@@ -111,7 +136,7 @@ export default function GanttChart() {
   }, [getColFromX, updateData]);
 
   // Task operations (declared before handlers that use them)
-  const moveTaskToCategory = useCallback((taskId, fromCatIdx, toCatIdx) => {
+  const moveTaskToCategory = useCallback((taskId: string, fromCatIdx: number, toCatIdx: number) => {
     if (fromCatIdx === toCatIdx) return;
     updateData(prev => {
       const next = { ...prev, categories: prev.categories.map(c => ({ ...c, tasks: [...c.tasks] })) };
@@ -136,7 +161,7 @@ export default function GanttChart() {
     });
   }, [updateData]);
 
-  const reorderTask = useCallback((taskId, fromCatIdx, toCatIdx, targetTaskIdx, above) => {
+  const reorderTask = useCallback((taskId: string, fromCatIdx: number, toCatIdx: number, targetTaskIdx: number, above: boolean) => {
     updateData(prev => {
       const next = { ...prev, categories: prev.categories.map(c => ({ ...c, tasks: [...c.tasks] })) };
       const fromCat = next.categories[fromCatIdx];
@@ -164,22 +189,22 @@ export default function GanttChart() {
   }, [updateData]);
 
   // Task row drag and drop (declared after moveTaskToCategory and reorderTask)
-  const handleTaskDragStart = useCallback((e, taskId, catIdx) => {
+  const handleTaskDragStart = useCallback((e: React.DragEvent, taskId: string, catIdx: number) => {
     if (dragRef.current) { e.preventDefault(); return; }
     e.dataTransfer.setData('text/plain', JSON.stringify({ taskId, fromCatIdx: catIdx }));
   }, []);
 
-  const handleCategoryDrop = useCallback((e, toCatIdx) => {
+  const handleCategoryDrop = useCallback((e: React.DragEvent, toCatIdx: number) => {
     e.preventDefault();
     try {
       const data = JSON.parse(e.dataTransfer.getData('text/plain'));
       if (data.taskId && data.fromCatIdx !== undefined) {
         moveTaskToCategory(data.taskId, data.fromCatIdx, toCatIdx);
       }
-    } catch {}
+    } catch { /* ignore */ }
   }, [moveTaskToCategory]);
 
-  const handleTaskDrop = useCallback((e, toCatIdx, toTaskIdx) => {
+  const handleTaskDrop = useCallback((e: React.DragEvent, toCatIdx: number, toTaskIdx: number) => {
     e.preventDefault();
     try {
       const data = JSON.parse(e.dataTransfer.getData('text/plain'));
@@ -187,24 +212,17 @@ export default function GanttChart() {
       const rect = e.currentTarget.getBoundingClientRect();
       const above = e.clientY < rect.top + rect.height / 2;
       reorderTask(data.taskId, data.fromCatIdx, toCatIdx, toTaskIdx, above);
-    } catch {}
+    } catch { /* ignore */ }
   }, [reorderTask]);
 
-  const moveTaskToActionItems = useCallback((task, fromCatIdx) => {
+  const moveTaskToActionItems = useCallback((task: Task, fromCatIdx: number) => {
     if (!allData) return;
     const actionIdx = allData.categories.findIndex((c) => c.name && c.name.includes('Action Items'));
     if (actionIdx < 0 || actionIdx === fromCatIdx) return;
     moveTaskToCategory(task.id, fromCatIdx, actionIdx);
   }, [allData, moveTaskToCategory]);
 
-  const returnToOrigin = useCallback((task, currentCatIdx) => {
-    if (!task._originCat || !allData) return false;
-    const originIdx = allData.categories.findIndex(c => c.name === task._originCat);
-    if (originIdx < 0 || originIdx === currentCatIdx) return false;
-    return true; // Caller handles the actual move in updateData
-  }, [allData]);
-
-  const unpinFromAction = useCallback((catIdx, taskIdx) => {
+  const unpinFromAction = useCallback((catIdx: number, taskIdx: number) => {
     updateData(prev => {
       const next = { ...prev, categories: prev.categories.map(c => ({ ...c, tasks: [...c.tasks.map(t => ({ ...t }))] })) };
       const task = next.categories[catIdx].tasks[taskIdx];
@@ -220,7 +238,7 @@ export default function GanttChart() {
     });
   }, [updateData]);
 
-  const cyclePriority = useCallback((catIdx, taskIdx) => {
+  const cyclePriority = useCallback((catIdx: number, taskIdx: number) => {
     updateData(prev => {
       const next = { ...prev, categories: prev.categories.map(c => ({ ...c, tasks: [...c.tasks.map(t => ({ ...t }))] })) };
       const task = next.categories[catIdx].tasks[taskIdx];
@@ -229,7 +247,7 @@ export default function GanttChart() {
     });
   }, [updateData]);
 
-  const cycleStatus = useCallback((catIdx, taskIdx) => {
+  const cycleStatus = useCallback((catIdx: number, taskIdx: number) => {
     updateData(prev => {
       const next = { ...prev, categories: prev.categories.map(c => ({ ...c, tasks: [...c.tasks.map(t => ({ ...t }))] })) };
       const task = next.categories[catIdx].tasks[taskIdx];
@@ -248,7 +266,7 @@ export default function GanttChart() {
     });
   }, [updateData]);
 
-  const moveCategoryUp = useCallback((catIdx) => {
+  const moveCategoryUp = useCallback((catIdx: number) => {
     if (catIdx <= 0) return;
     updateData(prev => {
       const next = { ...prev, categories: [...prev.categories] };
@@ -257,7 +275,7 @@ export default function GanttChart() {
     });
   }, [updateData]);
 
-  const moveCategoryDown = useCallback((catIdx) => {
+  const moveCategoryDown = useCallback((catIdx: number) => {
     updateData(prev => {
       const next = { ...prev, categories: [...prev.categories] };
       if (catIdx >= next.categories.length - 1) return prev;
@@ -271,17 +289,17 @@ export default function GanttChart() {
     try {
       setSaveStatus('saving');
       // Try server first (local dev)
-      await saveToServerApi(allData);
+      await saveToServerApi(allData!);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus(null), 1500);
     } catch {
       // Server not available — try GitHub API if private mode
       if (isPrivate && getSessionPinFn() && getGitHubTokenFn()) {
         try {
-          await saveToGitHubFn(allData, getSessionPinFn());
+          await saveToGitHubFn(allData!, getSessionPinFn()!);
           setSaveStatus('saved');
           setTimeout(() => setSaveStatus(null), 1500);
-        } catch (e) {
+        } catch {
           setSaveStatus('error');
           setTimeout(() => setSaveStatus(null), 2000);
         }
@@ -305,37 +323,37 @@ export default function GanttChart() {
   };
 
   const handleReset = () => {
-    if (confirm(t('confirmReset'))) {
+    if (confirm(t('confirmReset') as string)) {
       resetData();
     }
   };
 
   // Task modal handlers
-  const openEditModal = useCallback((task, catIdx) => {
+  const openEditModal = useCallback((task: Task, catIdx: number) => {
     if (dragMovedRef.current) return;
     setTaskModal({ open: true, task, isNew: false, catIdx });
   }, []);
 
-  const openAddTaskModal = useCallback((catIdx) => {
+  const openAddTaskModal = useCallback((catIdx: number) => {
     setTaskModal({ open: true, task: null, isNew: true, catIdx });
   }, []);
 
-  const handleTaskSave = useCallback((data) => {
+  const handleTaskSave = useCallback((data: { name: string; status: string; priority: string; start: string; end: string }) => {
     if (taskModal.isNew) {
       updateData(prev => {
         const next = { ...prev, categories: prev.categories.map(c => ({ ...c, tasks: [...c.tasks] })) };
-        next.categories[taskModal.catIdx].tasks.push({
+        next.categories[taskModal.catIdx!].tasks.push({
           id: 'task_' + Date.now(),
           ...data,
           cls: 'c-default'
-        });
+        } as Task);
         return next;
       });
     } else {
       updateData(prev => {
         const next = { ...prev, categories: prev.categories.map(c => ({
           ...c,
-          tasks: c.tasks.map(t => t.id === taskModal.task.id ? { ...t, ...data } : { ...t })
+          tasks: c.tasks.map(t => t.id === taskModal.task!.id ? { ...t, ...data } : { ...t })
         }))};
         return next;
       });
@@ -348,7 +366,7 @@ export default function GanttChart() {
     updateData(prev => {
       const next = { ...prev, categories: prev.categories.map(c => ({
         ...c,
-        tasks: c.tasks.filter(t => t.id !== taskModal.task.id)
+        tasks: c.tasks.filter(t => t.id !== taskModal.task!.id)
       }))};
       return next;
     });
@@ -356,7 +374,7 @@ export default function GanttChart() {
   }, [taskModal, updateData]);
 
   // Filter logic for rendering categories/tasks
-  const getFilteredData = useCallback(() => {
+  const getFilteredData = useCallback((): FilteredItem[] => {
     if (!allData) return [];
     const categories = allData.categories || [];
     const filters = currentFilter;
@@ -364,10 +382,10 @@ export default function GanttChart() {
     const specialFilters = ['all', 'active', 'pending', 'done', 'p-urgent', 'p-high', 'p-medium', 'p-low'];
     const tagFilters = [...filters].filter(f => !specialFilters.includes(f));
     const statusFilters = [...filters].filter(f => ['active', 'pending', 'done'].includes(f));
-    const priorityMapFilter = { 'p-urgent': 'urgent', 'p-high': 'high', 'p-medium': 'medium', 'p-low': 'low' };
+    const priorityMapFilter: Record<string, string> = { 'p-urgent': 'urgent', 'p-high': 'high', 'p-medium': 'medium', 'p-low': 'low' };
     const priorityFilters = [...filters].filter(f => priorityMapFilter[f]).map(f => priorityMapFilter[f]);
 
-    return categories.map((cat, catIdx) => {
+    return categories.map((cat, catIdx): FilteredItem | null => {
       const tags = cat.tags || [];
       if (tags.some(tag => tag.startsWith('divider'))) {
         if (!hasAll && statusFilters.length === 0 && priorityFilters.length === 0) return null;
@@ -376,7 +394,7 @@ export default function GanttChart() {
       if (tagFilters.length > 0 && !tagFilters.some(f => tags.includes(f))) return null;
       let tasks = cat.tasks || [];
       if (statusFilters.length > 0) {
-        const statusMap = { active: 'progress', pending: 'pending', done: 'done' };
+        const statusMap: Record<string, string> = { active: 'progress', pending: 'pending', done: 'done' };
         const statuses = statusFilters.map(f => statusMap[f]);
         tasks = tasks.filter(t => statuses.includes(t.status));
         if (tasks.length === 0) return null;
@@ -386,13 +404,13 @@ export default function GanttChart() {
         if (tasks.length === 0) return null;
       }
       return { type: 'category', cat, catIdx, tasks };
-    }).filter(Boolean);
+    }).filter(Boolean) as FilteredItem[];
   }, [allData, currentFilter]);
 
   const todayCol = TODAY_COL;
-  const tableRef = useRef(null);
+  const tableRef = useRef<HTMLTableElement>(null);
 
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   if (!allData) return <div style={{ padding: '24px' }}>Loading...</div>;
 
@@ -471,7 +489,7 @@ export default function GanttChart() {
                   onTaskDrop={handleTaskDrop}
                   onTaskDragStart={handleTaskDragStart}
                   onAddTask={openAddTaskModal}
-                  onEditCategory={(idx) => setCatModal({ open: true, catIdx: idx })}
+                  onEditCategory={(idx: number) => setCatModal({ open: true, catIdx: idx })}
                   onMoveCategoryUp={moveCategoryUp}
                   onMoveCategoryDown={moveCategoryDown}
                   onEditTask={openEditModal}
@@ -516,22 +534,46 @@ export default function GanttChart() {
 }
 
 // Sub-component for category + its tasks
+interface CategoryBlockProps {
+  cat: Category;
+  catIdx: number;
+  tasks: Task[];
+  isDark: boolean;
+  lang: string;
+  todayCol: number;
+  isActionItems: (catIdx: number) => boolean;
+  onCategoryDrop: (e: React.DragEvent, toCatIdx: number) => void;
+  onTaskDrop: (e: React.DragEvent, toCatIdx: number, toTaskIdx: number) => void;
+  onTaskDragStart: (e: React.DragEvent, taskId: string, catIdx: number) => void;
+  onAddTask: (catIdx: number) => void;
+  onEditCategory: (catIdx: number) => void;
+  onMoveCategoryUp: (catIdx: number) => void;
+  onMoveCategoryDown: (catIdx: number) => void;
+  onEditTask: (task: Task, catIdx: number) => void;
+  onCyclePriority: (catIdx: number, taskIdx: number) => void;
+  onCycleStatus: (catIdx: number, taskIdx: number) => void;
+  onPinToAction: (task: Task, fromCatIdx: number) => void;
+  onUnpinFromAction: (catIdx: number, taskIdx: number) => void;
+  startDrag: (e: React.MouseEvent, task: Task, mode: 'move' | 'start' | 'end') => void;
+  t: (key: string) => string | string[];
+}
+
 function CategoryBlock({
   cat, catIdx, tasks, isDark, lang, todayCol,
   isActionItems, onCategoryDrop, onTaskDrop, onTaskDragStart,
   onAddTask, onEditCategory, onMoveCategoryUp, onMoveCategoryDown,
   onEditTask, onCyclePriority, onCycleStatus, onPinToAction, onUnpinFromAction,
   startDrag, t
-}) {
+}: CategoryBlockProps) {
   const catIsAction = isActionItems(catIdx);
 
   return (
     <>
       <tr
         className="category-row"
-        onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('drop-target'); }}
-        onDragLeave={e => e.currentTarget.classList.remove('drop-target')}
-        onDrop={e => { e.currentTarget.classList.remove('drop-target'); onCategoryDrop(e, catIdx); }}
+        onDragOver={(e: React.DragEvent) => { e.preventDefault(); e.currentTarget.classList.add('drop-target'); }}
+        onDragLeave={(e: React.DragEvent) => e.currentTarget.classList.remove('drop-target')}
+        onDrop={(e: React.DragEvent) => { e.currentTarget.classList.remove('drop-target'); onCategoryDrop(e, catIdx); }}
       >
         <td colSpan={COLS + 2}>
           {cat.name}
@@ -546,23 +588,23 @@ function CategoryBlock({
       {tasks.map((task, taskIdx) => {
         const startCol = dateToCol(task.start);
         const endCol = dateToCol(task.end);
-        const statusLabel = { done: t('statusDone'), progress: t('statusProgress'), pending: t('statusPending') };
+        const statusLabel: Record<string, string | string[]> = { done: t('statusDone'), progress: t('statusProgress'), pending: t('statusPending') };
 
         return (
           <tr
             key={task.id}
             className={task.status === 'done' ? 'completed-row' : ''}
             draggable
-            onDragStart={e => onTaskDragStart(e, task.id, catIdx)}
-            onDragOver={e => {
+            onDragStart={(e: React.DragEvent) => onTaskDragStart(e, task.id, catIdx)}
+            onDragOver={(e: React.DragEvent) => {
               e.preventDefault();
               const rect = e.currentTarget.getBoundingClientRect();
               const mid = rect.top + rect.height / 2;
               e.currentTarget.classList.remove('drop-above', 'drop-below');
               e.currentTarget.classList.add(e.clientY < mid ? 'drop-above' : 'drop-below');
             }}
-            onDragLeave={e => e.currentTarget.classList.remove('drop-above', 'drop-below')}
-            onDrop={e => { e.currentTarget.classList.remove('drop-above', 'drop-below'); onTaskDrop(e, catIdx, taskIdx); }}
+            onDragLeave={(e: React.DragEvent) => e.currentTarget.classList.remove('drop-above', 'drop-below')}
+            onDrop={(e: React.DragEvent) => { e.currentTarget.classList.remove('drop-above', 'drop-below'); onTaskDrop(e, catIdx, taskIdx); }}
           >
             <td>
               <span onClick={() => onEditTask(task, catIdx)} style={{ cursor: 'pointer' }}>
@@ -576,16 +618,16 @@ function CategoryBlock({
               <span
                 className={`priority-tag ${PRIORITY_MAP[task.priority]}`}
                 style={{ cursor: 'pointer' }}
-                title={t('clickToChangePriority')}
-                onClick={e => { e.stopPropagation(); onCyclePriority(catIdx, taskIdx); }}
+                title={t('clickToChangePriority') as string}
+                onClick={(e: React.MouseEvent) => { e.stopPropagation(); onCyclePriority(catIdx, taskIdx); }}
               >
                 {PRIORITY_LABEL[task.priority]}
               </span>
               {!catIsAction && (
                 <button
                   className="pin-action-btn"
-                  title={t('addToActionItems')}
-                  onClick={e => { e.stopPropagation(); onPinToAction(task, catIdx); }}
+                  title={t('addToActionItems') as string}
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); onPinToAction(task, catIdx); }}
                 >
                   📌
                 </button>
@@ -594,7 +636,7 @@ function CategoryBlock({
                 <button
                   className="pin-action-btn"
                   title={lang === 'ko' ? '원래 카테고리로 되돌리기' : 'Return to original category'}
-                  onClick={e => { e.stopPropagation(); onUnpinFromAction(catIdx, taskIdx); }}
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); onUnpinFromAction(catIdx, taskIdx); }}
                 >
                   ↩️
                 </button>
@@ -604,7 +646,7 @@ function CategoryBlock({
               <span
                 className={`status-badge ${STATUS_CLASS[task.status]}`}
                 style={{ cursor: 'pointer' }}
-                title={t('clickToChangeStatus')}
+                title={t('clickToChangeStatus') as string}
                 onClick={() => onCycleStatus(catIdx, taskIdx)}
               >
                 {statusLabel[task.status]}
@@ -628,19 +670,19 @@ function CategoryBlock({
                         marginLeft: i === startCol && startCol !== endCol ? '1px' : undefined,
                         marginRight: i === endCol && startCol !== endCol ? '1px' : undefined,
                       }}
-                      onMouseDown={e => {
-                        if (!e.target.classList.contains('bar-handle')) startDrag(e, task, 'move');
+                      onMouseDown={(e: React.MouseEvent) => {
+                        if (!(e.target as HTMLElement).classList.contains('bar-handle')) startDrag(e, task, 'move');
                       }}
                       onClick={() => onEditTask(task, catIdx)}
                     >
                       {i === startCol && (
                         <>
                           <div className="tooltip">{task.tip || task.name}</div>
-                          <div className="bar-handle left" onMouseDown={e => { e.stopPropagation(); startDrag(e, task, 'start'); }} />
+                          <div className="bar-handle left" onMouseDown={(e: React.MouseEvent) => { e.stopPropagation(); startDrag(e, task, 'start'); }} />
                         </>
                       )}
                       {i === endCol && (
-                        <div className="bar-handle right" onMouseDown={e => { e.stopPropagation(); startDrag(e, task, 'end'); }} />
+                        <div className="bar-handle right" onMouseDown={(e: React.MouseEvent) => { e.stopPropagation(); startDrag(e, task, 'end'); }} />
                       )}
                     </div>
                   )}
