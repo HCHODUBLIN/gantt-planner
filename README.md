@@ -12,7 +12,7 @@ https://hchodublin.github.io/gantt-planner/
 ## Features
 
 ### Gantt Chart
-- Dynamic timeline (4 weeks back + 6 months ahead, auto-scrolls to current week)
+- 29-week timeline (Mar – Sep) with current week highlighted
 - Drag-and-drop bar resizing (start/end) and repositioning
 - Click-to-cycle status (Pending / In Progress / Done) and priority (Low / Med / High / Urgent)
 - Multi-select filtering by status, priority, and custom tags
