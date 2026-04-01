@@ -379,7 +379,7 @@ export default function WeeklyPlanner() {
                       period="full-day"
                       label={`📚 ${routine.sunday || t('study')}`}
                       className="time-block"
-                      style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)' }}
+                      style={{}}
                       tasks={getTasksForSlot(dayKey, 'full-day')}
                       allTasks={allTasks}
                       onDrop={handleDropOnSlot}
