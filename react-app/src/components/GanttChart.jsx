@@ -378,25 +378,7 @@ export default function GanttChart() {
   const todayCol = TODAY_COL;
   const tableRef = useRef(null);
 
-  // Auto-scroll to current week on mount
   const containerRef = useRef(null);
-  const hasScrolled = useRef(false);
-  useEffect(() => {
-    if (!allData || hasScrolled.current) return;
-    const timer = setTimeout(() => {
-      const container = containerRef.current;
-      if (!container) return;
-      const todayCells = container.querySelectorAll('.today-col');
-      if (todayCells.length > 0) {
-        const cell = todayCells[0];
-        const rect = cell.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        container.scrollLeft += rect.left - containerRect.left - 250;
-        hasScrolled.current = true;
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [allData]);
 
   if (!allData) return <div style={{ padding: '24px' }}>Loading...</div>;
 

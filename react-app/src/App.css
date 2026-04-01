@@ -86,7 +86,8 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; color: var(--cat-tex
 
 /* Gantt container */
 .gantt-container { background: var(--surface); border-radius: 12px; box-shadow: 0 2px 12px var(--shadow); overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; min-width: 1200px; }
+table { border-collapse: collapse; min-width: 100%; }
+.bar-cell { min-width: 30px; }
 thead th { position: sticky; top: 0; background: var(--surface-alt); font-size: 10.5px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 6px; border-bottom: 2px solid var(--border); text-align: center; z-index: 5; }
 thead th:first-child { text-align: left; padding-left: 14px; min-width: 300px; position: sticky; left: 0; z-index: 10; background: var(--surface-alt); }
 thead th:nth-child(2) { min-width: 70px; text-align: center; position: sticky; left: 300px; z-index: 10; background: var(--surface-alt); }
@@ -150,9 +151,7 @@ body.dark .s-progress { background: #1F282D; color: #447ACB; }
 body.dark .s-pending { background: #252525; color: #9B9B9B; }
 
 /* Tooltip */
-.tooltip { display: none; position: absolute; background: var(--accent); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 11px; z-index: 100; white-space: nowrap; bottom: 110%; left: 50%; transform: translateX(-50%); pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-.tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--accent); }
-.bar:hover .tooltip { display: block; }
+.tooltip { display: none; }
 
 /* Special rows */
 .week-markers th { font-size: 9px; color: var(--text-muted); font-weight: 400; padding: 2px 6px; border-bottom: 1px solid var(--border); }

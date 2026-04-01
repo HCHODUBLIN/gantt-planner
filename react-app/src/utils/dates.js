@@ -9,18 +9,9 @@ export function formatDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-// Dynamic date range: 4 weeks before current week + 6 months ahead
-const now = new Date();
-const currentWeekStart = getWeekStart(now);
-
-export const BASE_DATE = new Date(currentWeekStart);
-BASE_DATE.setDate(BASE_DATE.getDate() - 4 * 7);
-
-const endDate = new Date(currentWeekStart);
-endDate.setMonth(endDate.getMonth() + 6);
-export const COLS = Math.ceil((endDate - BASE_DATE) / (7 * 24 * 60 * 60 * 1000));
-
-export const TODAY_COL = Math.round((currentWeekStart - BASE_DATE) / (7 * 24 * 60 * 60 * 1000));
+export const BASE_DATE = new Date(2026, 2, 23); // Mar 23, 2026
+export const COLS = 29; // 29 weeks: Mar 23 ~ Sep 28
+export const TODAY_COL = Math.max(0, Math.min(28, Math.round((getWeekStart(new Date()) - BASE_DATE) / (7 * 24 * 60 * 60 * 1000))));
 
 export function dateToCol(dateStr) {
   const d = new Date(dateStr);
