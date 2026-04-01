@@ -198,25 +198,21 @@ export default function WeeklyPlanner() {
   const goToPreviousWeek = () => setCurrentWeekStart(prev => new Date(prev.getTime() - 7 * 24 * 60 * 60 * 1000));
   const goToNextWeek = () => setCurrentWeekStart(prev => new Date(prev.getTime() + 7 * 24 * 60 * 60 * 1000));
 
-  // Focus & training info
+  // Focus & training from Action Items
   const focusProject = (() => {
-    const endDate = formatDateKey(new Date(currentWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000));
-    const startDate = formatDateKey(currentWeekStart);
-    const urgent = allTasks.filter(t => {
-      const inWeek = t.start <= endDate && t.end >= startDate;
-      return inWeek && ['urgent', 'high'].includes(t.priority) && (t.cls === 'c-proj' || t.cls === 'c-action');
-    });
-    return urgent.length > 0 ? urgent[0].name : t('noFocus');
+    const focus = actionItems.filter(t => ['urgent', 'high'].includes(t.priority));
+    return focus.length > 0 ? focus[0].name : t('noFocus');
   })();
 
   const currentTraining = (() => {
-    const endDate = formatDateKey(new Date(currentWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000));
-    const startDate = formatDateKey(currentWeekStart);
-    const courses = allTasks.filter(t => {
-      const inWeek = t.start <= endDate && t.end >= startDate;
-      return inWeek && t.priority === 'urgent' && (t.cls === 'c-course' || t.cls === 'c-zoomcamp');
-    });
-    return courses.length > 0 ? courses[0].name : 'Leetcode SQL';
+    const training = actionItems.filter(t =>
+      t.name && (t.name.toLowerCase().includes('study') || t.name.toLowerCase().includes('course') ||
+      t.name.toLowerCase().includes('cert') || t.name.toLowerCase().includes('zoomcamp') ||
+      t.name.toLowerCase().includes('leetcode') || t.name.toLowerCase().includes('학습'))
+    );
+    if (training.length > 0) return training[0].name;
+    // Fallback: second action item if exists
+    return actionItems.length > 1 ? actionItems[1].name : t('noFocus');
   })();
 
   // Save to server
