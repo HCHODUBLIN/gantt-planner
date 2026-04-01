@@ -262,8 +262,6 @@ body.dark .priority-low { background: #242B26; color: #4F9768; }
 
 /* Rest/study days */
 .rest-day { background: var(--rest-bg) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; font-weight: 600; }
-.study-day { position: relative; }
-.study-day::after { content: ''; position: absolute; top: 0; right: 0; width: 20px; height: 20px; background: linear-gradient(135deg, #0284c7 0%, transparent 70%); border-radius: 0 6px 0 0; }
 
 /* Day note */
 .day-note { background: var(--note-bg); border: 1px dashed var(--note-border); border-radius: 3px; padding: 6px; font-size: 10px; margin-top: 4px; cursor: pointer; min-height: 30px; display: flex; align-items: center; font-style: italic; color: var(--note-text); }
