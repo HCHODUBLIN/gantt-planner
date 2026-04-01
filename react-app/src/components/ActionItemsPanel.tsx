@@ -1,26 +1,34 @@
+import React from 'react';
 import { useI18n } from '../contexts/I18nContext';
+import type { Task, TaskPriority } from '../types';
 
-const PRIORITY_LABELS = { urgent: 'URGENT', high: 'HIGH', medium: 'MED', low: 'LOW' };
-const PRIORITY_CLASSES = { urgent: 'priority-urgent', high: 'priority-high', medium: 'priority-medium', low: 'priority-low' };
+const PRIORITY_LABELS: Record<string, string> = { urgent: 'URGENT', high: 'HIGH', medium: 'MED', low: 'LOW' };
+const PRIORITY_CLASSES: Record<string, string> = { urgent: 'priority-urgent', high: 'priority-high', medium: 'priority-medium', low: 'priority-low' };
 
-export default function ActionItemsPanel({ actionItems, onDragStart, onDropReturn }) {
+interface ActionItemsPanelProps {
+  actionItems: Task[];
+  onDragStart: (taskId: string) => void;
+  onDropReturn: (e: React.DragEvent) => void;
+}
+
+export default function ActionItemsPanel({ actionItems, onDragStart, onDropReturn }: ActionItemsPanelProps) {
   const { t } = useI18n();
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.style.outline = '2px dashed var(--accent)';
-    e.currentTarget.style.background = 'var(--surface-hover)';
+    (e.currentTarget as HTMLElement).style.outline = '2px dashed var(--accent)';
+    (e.currentTarget as HTMLElement).style.background = 'var(--surface-hover)';
   };
 
-  const handleDragLeave = (e) => {
-    e.currentTarget.style.outline = '';
-    e.currentTarget.style.background = '';
+  const handleDragLeave = (e: React.DragEvent) => {
+    (e.currentTarget as HTMLElement).style.outline = '';
+    (e.currentTarget as HTMLElement).style.background = '';
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.style.outline = '';
-    e.currentTarget.style.background = '';
+    (e.currentTarget as HTMLElement).style.outline = '';
+    (e.currentTarget as HTMLElement).style.background = '';
     onDropReturn(e);
   };
 
@@ -46,7 +54,7 @@ export default function ActionItemsPanel({ actionItems, onDragStart, onDropRetur
             key={task.id}
             className="action-item-chip"
             draggable
-            onDragStart={e => {
+            onDragStart={(e: React.DragEvent) => {
               onDragStart(task.id);
               e.dataTransfer.effectAllowed = 'copy';
             }}

@@ -1,13 +1,17 @@
 import { useData } from '../contexts/DataContext';
 import { useI18n } from '../contexts/I18nContext';
 
-export default function RoutineSection({ onEditRoutine }) {
+interface RoutineSectionProps {
+  onEditRoutine: () => void;
+}
+
+export default function RoutineSection({ onEditRoutine }: RoutineSectionProps) {
   const { allData } = useData();
   const { t, lang } = useI18n();
 
   if (!allData) return null;
 
-  const routine = allData.routine || {};
+  const routine = allData.routine || { blocks: [], saturday: '', sunday: '', rules: '', exercise: '' };
   const blocks = routine.blocks || [];
 
   const extras = [

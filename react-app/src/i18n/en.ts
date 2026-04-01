@@ -1,4 +1,6 @@
-const en = {
+import type { Translations } from '../types';
+
+const en: Translations = {
   // Gantt chart
   title: 'Work Gantt Chart 2026',
   subtitle: 'Mar – Sep 2026',
@@ -112,7 +114,6 @@ const en = {
   morning: 'Morning',
   afternoon: 'Afternoon',
   evening: 'Evening',
-  days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   actionItems: '🔴 Action Items',
   actionHint: 'Drag tasks into time blocks below',
   noData: 'No data to save.',

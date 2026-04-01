@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useI18n } from '../contexts/I18nContext';
 
-export default function CategoryModal({ isOpen, catIdx, onClose }) {
+interface CategoryModalProps {
+  isOpen: boolean;
+  catIdx: number | null;
+  onClose: () => void;
+}
+
+export default function CategoryModal({ isOpen, catIdx, onClose }: CategoryModalProps) {
   const { allData, updateData, getAllTags } = useData();
   const { t } = useI18n();
 
@@ -11,10 +17,10 @@ export default function CategoryModal({ isOpen, catIdx, onClose }) {
 
   // Compute initial values directly from current props
   const cat = isEditing && allData ? allData.categories[catIdx] : null;
-  const [name, setName] = useState('');
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [newTag, setNewTag] = useState('');
-  const [initialized, setInitialized] = useState(false);
+  const [name, setName] = useState<string>('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState<string>('');
+  const [initialized, setInitialized] = useState<boolean>(false);
 
   // Reset when modal opens (isOpen transitions to true)
   if (isOpen && !initialized) {
@@ -29,7 +35,7 @@ export default function CategoryModal({ isOpen, catIdx, onClose }) {
 
   if (!isOpen) return null;
 
-  const toggleTag = (tag) => {
+  const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
@@ -50,7 +56,7 @@ export default function CategoryModal({ isOpen, catIdx, onClose }) {
       const next = { ...prev, categories: [...prev.categories] };
       if (isEditing) {
         next.categories[catIdx] = { ...next.categories[catIdx], name: name.trim(), tags: selectedTags };
-        delete next.categories[catIdx].section;
+        delete (next.categories[catIdx] as Record<string, unknown>).section;
       } else {
         next.categories.push({ name: name.trim(), tags: selectedTags, tasks: [] });
       }
@@ -60,9 +66,9 @@ export default function CategoryModal({ isOpen, catIdx, onClose }) {
   };
 
   const handleDelete = () => {
-    if (!isEditing) return;
+    if (!isEditing || !allData) return;
     const c = allData.categories[catIdx];
-    const msg = t('deleteCatConfirm').replace('{name}', c.name).replace('{count}', c.tasks.length);
+    const msg = (t('deleteCatConfirm') as string).replace('{name}', c.name).replace('{count}', String(c.tasks.length));
     if (!confirm(msg)) return;
     updateData(prev => {
       const next = { ...prev, categories: [...prev.categories] };
@@ -76,12 +82,12 @@ export default function CategoryModal({ isOpen, catIdx, onClose }) {
   const displayTags = [...new Set([...allTags, ...selectedTags])];
 
   return (
-    <div className="modal-overlay active" onClick={e => e.target === e.currentTarget && onClose()}>
+    <div className="modal-overlay active" onClick={(e: React.MouseEvent) => e.target === e.currentTarget && onClose()}>
       <div className="modal-content">
         <div className="modal-title">{isEditing ? t('catModalTitle') : t('newCatTitle')}</div>
         <div className="form-group">
           <label>{t('catNameLabel')}</label>
-          <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="📊 Category Name" />
+          <input type="text" value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="📊 Category Name" />
         </div>
         <div className="form-group">
           <label>{t('catTagsLabel')}</label>
@@ -107,10 +113,10 @@ export default function CategoryModal({ isOpen, catIdx, onClose }) {
             <input
               type="text"
               value={newTag}
-              onChange={e => setNewTag(e.target.value)}
-              placeholder={t('newTagPlaceholder')}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTag(e.target.value)}
+              placeholder={t('newTagPlaceholder') as string}
               style={{ flex: 1, padding: '6px 8px', border: '1.5px solid #ddd', borderRadius: '6px', fontSize: '11px' }}
-              onKeyDown={e => e.key === 'Enter' && addCustomTag()}
+              onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && addCustomTag()}
             />
             <button
               type="button"

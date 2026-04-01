@@ -1,13 +1,23 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useI18n } from '../contexts/I18nContext';
+import type { Task, TaskStatus, TaskPriority } from '../types';
 
-export default function TaskModal({ isOpen, task, isNew, onSave, onDelete, onClose }) {
+interface TaskModalProps {
+  isOpen: boolean;
+  task: Task | null;
+  isNew: boolean;
+  onSave: (data: { name: string; status: string; priority: string; start: string; end: string }) => void;
+  onDelete: () => void;
+  onClose: () => void;
+}
+
+export default function TaskModal({ isOpen, task, isNew, onSave, onDelete, onClose }: TaskModalProps) {
   const { t } = useI18n();
-  const [name, setName] = useState('');
-  const [status, setStatus] = useState('pending');
-  const [priority, setPriority] = useState('medium');
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
+  const [name, setName] = useState<string>('');
+  const [status, setStatus] = useState<string>('pending');
+  const [priority, setPriority] = useState<string>('medium');
+  const [start, setStart] = useState<string>('');
+  const [end, setEnd] = useState<string>('');
 
   useEffect(() => {
     if (task) {
@@ -39,16 +49,16 @@ export default function TaskModal({ isOpen, task, isNew, onSave, onDelete, onClo
   };
 
   return (
-    <div className="modal-overlay active" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="modal-overlay active" onClick={(e: React.MouseEvent) => e.target === e.currentTarget && onClose()}>
       <div className="modal-content">
         <div className="modal-title">{isNew ? t('addTaskTitle') : t('modalTitle')}</div>
         <div className="form-group">
           <label>{t('labelName')}</label>
-          <input type="text" value={name} onChange={e => setName(e.target.value)} required />
+          <input type="text" value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} required />
         </div>
         <div className="form-group">
           <label>{t('labelStatus')}</label>
-          <select value={status} onChange={e => setStatus(e.target.value)}>
+          <select value={status} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value)}>
             <option value="pending">{t('optPending')}</option>
             <option value="progress">{t('optProgress')}</option>
             <option value="done">{t('optDone')}</option>
@@ -56,7 +66,7 @@ export default function TaskModal({ isOpen, task, isNew, onSave, onDelete, onClo
         </div>
         <div className="form-group">
           <label>{t('labelPriority')}</label>
-          <select value={priority} onChange={e => setPriority(e.target.value)}>
+          <select value={priority} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPriority(e.target.value)}>
             <option value="low">{t('optLow')}</option>
             <option value="medium">{t('optMedium')}</option>
             <option value="high">{t('optHigh')}</option>
@@ -65,11 +75,11 @@ export default function TaskModal({ isOpen, task, isNew, onSave, onDelete, onClo
         </div>
         <div className="form-group">
           <label>{t('labelStart')}</label>
-          <input type="date" value={start} onChange={e => setStart(e.target.value)} required />
+          <input type="date" value={start} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStart(e.target.value)} required />
         </div>
         <div className="form-group">
           <label>{t('labelEnd')}</label>
-          <input type="date" value={end} onChange={e => setEnd(e.target.value)} required />
+          <input type="date" value={end} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEnd(e.target.value)} required />
         </div>
         <div className="modal-buttons">
           {!isNew && onDelete && (

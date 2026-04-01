@@ -1,17 +1,22 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useI18n } from '../contexts/I18nContext';
 
-export default function TagManageModal({ isOpen, onClose }) {
+interface TagManageModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function TagManageModal({ isOpen, onClose }: TagManageModalProps) {
   const { allData, updateData, getAllTags, currentFilter, setCurrentFilter } = useData();
   const { t } = useI18n();
-  const [editValues, setEditValues] = useState({});
+  const [editValues, setEditValues] = useState<Record<string, string>>({});
 
   if (!isOpen) return null;
 
   const tags = getAllTags();
 
-  const renameTag = (oldTag) => {
+  const renameTag = (oldTag: string) => {
     const newTag = (editValues[oldTag] || '').trim().toLowerCase().replace(/\s+/g, '-');
     if (!newTag || newTag === oldTag) return;
     updateData(prev => {
@@ -33,8 +38,8 @@ export default function TagManageModal({ isOpen, onClose }) {
     });
   };
 
-  const deleteTag = (tag) => {
-    const msg = t('tagDeleteConfirm').replace('{tag}', tag);
+  const deleteTag = (tag: string) => {
+    const msg = (t('tagDeleteConfirm') as string).replace('{tag}', tag);
     if (!confirm(msg)) return;
     updateData(prev => {
       const next = { ...prev, categories: prev.categories.map(cat => ({
@@ -51,7 +56,7 @@ export default function TagManageModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="modal-overlay active" onClick={e => e.target === e.currentTarget && onClose()}>
+    <div className="modal-overlay active" onClick={(e: React.MouseEvent) => e.target === e.currentTarget && onClose()}>
       <div className="modal-content" style={{ maxWidth: '450px' }}>
         <div className="modal-title">{t('tagManageTitle')}</div>
         <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -63,7 +68,7 @@ export default function TagManageModal({ isOpen, onClose }) {
               <input
                 type="text"
                 value={editValues[tag] !== undefined ? editValues[tag] : tag}
-                onChange={e => setEditValues(prev => ({ ...prev, [tag]: e.target.value }))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditValues(prev => ({ ...prev, [tag]: e.target.value }))}
                 style={{ flex: 1, padding: '6px 8px', border: '1.5px solid #ddd', borderRadius: '6px', fontSize: '12px', fontFamily: 'inherit' }}
               />
               <button
