@@ -61,6 +61,20 @@ export function DataProvider({ children }: DataProviderProps) {
   // Unlock with PIN
   const unlockWithPin = useCallback(async (pin: string): Promise<boolean> => {
     try {
+      // If localStorage already has data, use it (it's likely more recent)
+      const local = loadFromLocalStorage();
+      if (local) {
+        setAllData(local);
+        dataRef.current = local;
+        setSessionPin(pin);
+        setUnlocked(true);
+        setIsPrivate(true);
+        setShowPinModal(false);
+        setPinError(null);
+        return true;
+      }
+
+      // Otherwise load from encrypted file
       const resp = await fetch(import.meta.env.BASE_URL + 'tasks.encrypted.json');
       if (!resp.ok) {
         setPinError('No encrypted data found. Save your data first with a PIN.');
