@@ -165,7 +165,7 @@ export function DataProvider({ children }: DataProviderProps) {
   const isActionItems = useCallback((catIdx: number): boolean => {
     if (!dataRef.current) return false;
     const cat = dataRef.current.categories[catIdx];
-    return cat && cat.name && cat.name.includes('Action Items');
+    return !!(cat && cat.name && cat.name.includes('Action Items'));
   }, []);
 
   // Get all tags
@@ -180,9 +180,23 @@ export function DataProvider({ children }: DataProviderProps) {
     return [...tags];
   }, []);
 
-  // Reset data
-  const resetData = useCallback(() => {
+  // Reset data — reload from encrypted if private, otherwise demo
+  const resetData = useCallback(async () => {
     clearLocalStorage();
+    if (isUnlocked() && getSessionPin()) {
+      // Re-load from encrypted data
+      try {
+        const resp = await fetch(import.meta.env.BASE_URL + 'tasks.encrypted.json');
+        if (resp.ok) {
+          const encData = await resp.text();
+          const data = await decrypt(encData, getSessionPin()!);
+          setAllData(data);
+          dataRef.current = data;
+          saveToLocalStorage(data);
+          return;
+        }
+      } catch { /* fall through to reload */ }
+    }
     window.location.reload();
   }, []);
 
