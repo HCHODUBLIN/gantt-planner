@@ -115,6 +115,7 @@ const ko: Translations = {
   afternoon: '오후',
   evening: '저녁',
   actionItems: '🔴 Action Items',
+  days: ['월', '화', '수', '목', '금', '토', '일'],
   actionHint: '아래 시간 블록으로 드래그하세요',
   noData: '저장할 데이터가 없습니다.',
   noActionItems: 'No action items',

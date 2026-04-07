@@ -115,6 +115,7 @@ const en: Translations = {
   afternoon: 'Afternoon',
   evening: 'Evening',
   actionItems: '🔴 Action Items',
+  days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   actionHint: 'Drag tasks into time blocks below',
   noData: 'No data to save.',
   noActionItems: 'No action items',
