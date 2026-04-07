@@ -46,7 +46,7 @@ export default function WeeklyPlanner() {
   const { t, lang } = useI18n();
   const { isDark } = useTheme();
 
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getWeekStart(new Date(2026, 2, 23)));
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getWeekStart(new Date()));
   const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlanType>({});
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [actionItems, setActionItems] = useState<Task[]>([]);
@@ -224,7 +224,7 @@ export default function WeeklyPlanner() {
   }, [weeklyPlan, saveWP, t]);
 
   // Week navigation
-  const goToCurrentWeek = () => setCurrentWeekStart(getWeekStart(new Date(2026, 2, 23)));
+  const goToCurrentWeek = () => setCurrentWeekStart(getWeekStart(new Date()));
   const goToPreviousWeek = () => setCurrentWeekStart(prev => new Date(prev.getTime() - 7 * 24 * 60 * 60 * 1000));
   const goToNextWeek = () => setCurrentWeekStart(prev => new Date(prev.getTime() + 7 * 24 * 60 * 60 * 1000));
 
